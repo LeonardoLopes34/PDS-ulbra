@@ -1,35 +1,34 @@
-package com.example.controlegasto.presentation.screens.report
+package com.example.controlegasto.presentation.home
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.BottomAppBar
+import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
@@ -37,44 +36,54 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.example.controlegasto.presentation.cards.ExpenseCard
-import com.example.controlegasto.presentation.cards.ReportFilterCard
+import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.controlegasto.presentation.dialogs.AddExpenseDialog
 import com.example.controlegasto.presentation.theme.ButtonColor
 import com.example.controlegasto.presentation.theme.ControleGastoTheme
 import com.example.controlegasto.presentation.theme.LightBlue
 import com.example.controlegasto.presentation.theme.LightBlue2
 import com.example.controlegasto.presentation.theme.TextColorTotal
-import java.math.BigDecimal
+import com.example.controlegasto.presentation.viewmodels.HomeViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ReportScreen(modifier: Modifier = Modifier) {
+fun HomeScreen(
+    modifier: Modifier = Modifier,
+    viewModel: HomeViewModel = viewModel()
+) {
+
+    val uiState by viewModel.uiState.collectAsState()
+
+    if(uiState.isAddExpanseDialogVisible) {
+        AddExpenseDialog(
+            onDismissRequest = viewModel::onDialogDismiss,
+            onSaveClick = { expense ->
+                viewModel.onSaveExpanse(expense)
+                viewModel.onDialogDismiss()
+            }
+        )
+    }
+
     var selectedItemIndex by remember { mutableIntStateOf(0) }
-    val navItems = listOf(  //placeholder da bottomBar Navegacao
-        "Inicio" to Icons.Default.Home,
+    val navItems = listOf(
+        "inicio" to Icons.Default.Home,
         "Relatorios" to Icons.Default.Search,
         "Configurações" to Icons.Default.Settings
     )
-    Scaffold (
+    Scaffold(
         containerColor = LightBlue2,
-        modifier = Modifier,
+        modifier = modifier,
         topBar = {
-            TopAppBar(
+            CenterAlignedTopAppBar(
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = LightBlue,
                     titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
                 ),
-                title = {Text("Relatórios")},
-                navigationIcon = {
-                    IconButton(onClick = {/*TODO*/}) {
-                        Icon(
-                            imageVector = Icons.Default.ArrowBack,
-                            contentDescription = "Icone de voltar"
-                        )
-                    }
-                }
+                title = { Text("Menu") }
             )
         },
         bottomBar = {
@@ -82,22 +91,22 @@ fun ReportScreen(modifier: Modifier = Modifier) {
                 navItems.forEachIndexed { index, item ->
                     NavigationBarItem(
                         selected = (selectedItemIndex == index),
-                        onClick = {selectedItemIndex = index},
+                        onClick = { selectedItemIndex = index },
                         icon = {
                             Icon(
                                 imageVector = item.second,
                                 contentDescription = item.first
                             )
                         },
-                        label = { Text(text = item.first)}
+                        label = { Text(text = item.first) }
                     )
                 }
             }
         },
         floatingActionButton = {
             FloatingActionButton(
+                onClick = viewModel::onAddExpanseClicked,
                 containerColor = ButtonColor,
-                onClick = {/* TODO */},
                 modifier = Modifier.size(80.dp),
             ) {
                 Icon(
@@ -106,7 +115,7 @@ fun ReportScreen(modifier: Modifier = Modifier) {
                 )
             }
         },
-        content = {innerPadding ->
+        content = { innerPadding ->
             Column(
                 modifier = Modifier
                     .padding(innerPadding)
@@ -116,48 +125,57 @@ fun ReportScreen(modifier: Modifier = Modifier) {
                 verticalArrangement = Arrangement.spacedBy(24.dp)
             ) {
                 Text(
-                    "Total do dia: R$00000000", style = MaterialTheme.typography.titleLarge, color = TextColorTotal
+                    "Total do dia: R$ 00000", style = MaterialTheme.typography.titleLarge
                 )
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(200.dp)
-                        .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.secondaryContainer),
+                        .clip(CircleShape) // Define a forma como um círculo
+                        .background(MaterialTheme.colorScheme.secondaryContainer), // Aplica a cor de fundo
                     contentAlignment = Alignment.Center
                 ) {
-                    Text("Teste Grafico")
+                    Text("Teste")
                 }
-                Row(
+                Row(   //trocar essa row por uma lazyrow para evitar os cards de ficarem espremidos
                     modifier = Modifier
                         .fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    ReportFilterCard(
-                        "Teste",
-                        MaterialTheme.colorScheme.tertiary,
-                        modifier = Modifier.weight(1f)
-                    )
-                    ReportFilterCard(
-                        "Teste2",
-                        MaterialTheme.colorScheme.scrim,
-                        modifier = Modifier.weight(1f)
-                    )
-                    ReportFilterCard(
-                        "Teste3",
+                    HomeCategoryCard(
+                        "Categoria",
                         MaterialTheme.colorScheme.error,
                         modifier = Modifier.weight(1f)
                     )
-                    ReportFilterCard(
-                        "Teste2",
-                        MaterialTheme.colorScheme.surface,
+                    HomeCategoryCard(
+                        "Quiosque",
+                        MaterialTheme.colorScheme.error,
+                        modifier = Modifier.weight(1f)
+                    )
+                    HomeCategoryCard(
+                        "Carro",
+                        MaterialTheme.colorScheme.error,
+                        modifier = Modifier.weight(1f)
+                    )
+                    HomeCategoryCard(
+                        "Casa",
+                        MaterialTheme.colorScheme.error,
                         modifier = Modifier.weight(1f)
                     )
                 }
-                LazyColumn(
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {  }
-                // usar lazycolumn para fazer a lista de cards com os gastos
+                Spacer(modifier = Modifier.height(15.dp))
+                Column(
+                    modifier = Modifier,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        "Total: R$ 00000000",
+                        color = TextColorTotal,
+                        fontSize = 30.sp,
+                        style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold
+                    )
+                }
+                Spacer(modifier = Modifier.weight(1f))
             }
         }
     )
@@ -165,8 +183,8 @@ fun ReportScreen(modifier: Modifier = Modifier) {
 
 @Preview(showBackground = true)
 @Composable
-fun ReportScreenPreview() {
+fun HomeScreenPreview() {
     ControleGastoTheme {
-        ReportScreen()
+        HomeScreen()
     }
 }

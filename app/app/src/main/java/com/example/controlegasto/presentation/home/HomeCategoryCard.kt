@@ -1,4 +1,4 @@
-package com.example.controlegasto.presentation.cards
+package com.example.controlegasto.presentation.home
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
