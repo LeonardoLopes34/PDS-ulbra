@@ -2,6 +2,7 @@ package com.example.controlegasto.presentation.viewmodels
 
 import androidx.lifecycle.ViewModel
 import com.example.controlegasto.domain.entities.Category
+import com.example.controlegasto.domain.entities.Expense
 import com.example.controlegasto.domain.entities.PaymentMethod
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -28,6 +29,14 @@ class AddExpanseViewModel: ViewModel() {
 
     fun onExpanseValueChanged(value: String) {
         _uiState.update { it.copy(expanseValue = value) }
+    }
+
+    init {
+        _uiState.update {
+            it.copy(
+                paymentMethodList = PaymentMethod.entries.toList(),
+            )
+        }
     }
 
     fun onExpanseDescriptionChanged(description: String) {
@@ -70,5 +79,26 @@ class AddExpanseViewModel: ViewModel() {
         _uiState.update { it.copy(isPaymentMethodSheetVisible = true) }
     }
 
+    fun onSaveTapped(onSaveSucess: (Expense) -> Unit) {
+        val numValue = _uiState.value.expanseValue.replace(",", ".").toBigDecimalOrNull()
+        val currentCategory = _uiState.value.expanseSelectedCategory
+        val currentPaymentMethod = _uiState.value.expanseSelectedPaymentMethod
+
+        if(numValue == null || currentCategory == null || currentPaymentMethod == null) {
+            _uiState.update { it.copy(errorMessage = "Preencha todos os campos obrigatorios") }
+            return
+        }
+        val newExpense = Expense(
+            value = numValue,
+            description = _uiState.value.expanseDescription,
+            category = currentCategory,
+            paymentMethod = currentPaymentMethod,
+            date = _uiState.value.expanseSelectedDate
+        )
+
+        _uiState.update { it.copy(errorMessage = null) }
+        onSaveSucess(newExpense)
+
+    }
     // get category and payment methods from repository
 }

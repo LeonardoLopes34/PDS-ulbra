@@ -36,6 +36,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -50,10 +51,12 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.controlegasto.R
 import com.example.controlegasto.domain.entities.Category
 import com.example.controlegasto.domain.entities.Expense
 import com.example.controlegasto.domain.entities.PaymentMethod
+import com.example.controlegasto.presentation.viewmodels.AddExpanseViewModel
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
@@ -63,90 +66,61 @@ import java.time.format.DateTimeFormatter
 @Composable
 fun AddExpenseDialog(
     onDismissRequest: () -> Unit,
-    onSaveClick: (Expense) -> Unit
+    onSaveClick: (Expense) -> Unit,
+    viewModel: AddExpanseViewModel = viewModel()
 ) {
-    var expense by remember { mutableStateOf("") }
-    var paymentMethod by remember { mutableStateOf<PaymentMethod?>(null) }
-    var category by remember { mutableStateOf<Category?>(null) }
-    var description by remember { mutableStateOf("") }
-
-    // state for bottom sheet menu
-    var showCategorySheet by remember { mutableStateOf(false) }
-    val categorySheetState = rememberModalBottomSheetState()
-    val categoryList = listOf<Category>()
-    var showPaymentMethodSheet by remember { mutableStateOf(false) }
-    val paymentMethodSheetState = rememberModalBottomSheetState()
-    val paymentMethodList = listOf<PaymentMethod>()
-
-    // calendar control
-    var showDatePicker by remember { mutableStateOf(false) }
-    val datePickerState = rememberDatePickerState()
-    var selectedDate by remember { mutableStateOf<LocalDate>(LocalDate.now()) }
-    var errorMessage by remember { mutableStateOf<String?>(null) }
-
+    val uiState by viewModel.uiState.collectAsState()
 
     // calendar for picked date
-    if (showDatePicker) {
+    if (uiState.isDatePickerSelected) {
+        val datePickerState = rememberDatePickerState(
+            initialSelectedDateMillis = uiState.expanseSelectedDate.atStartOfDay(ZoneId.systemDefault())
+                .toInstant().toEpochMilli()
+        )
         DatePickerDialog(
-            onDismissRequest = { showDatePicker = false },
+            onDismissRequest = viewModel::onDatePickerDismiss,
             confirmButton = {
                 TextButton(
                     onClick = {
-                        showDatePicker = false
-                        datePickerState.selectedDateMillis?.let { millis ->
-                            selectedDate =
-                                Instant.ofEpochMilli(millis).atZone(ZoneId.systemDefault())
-                                    .toLocalDate()
-                        }
+                        val selectedMillis = datePickerState.selectedDateMillis
+
+                        val selectedDate = selectedMillis?.let {
+                            Instant.ofEpochMilli(it).atZone(ZoneId.systemDefault()).toLocalDate()
+                        } ?: uiState.expanseSelectedDate
+                        viewModel.onExpanseDateSelected(selectedDate)
                     }
                 ) {
-                    Text("Ok")
+                    Text("OK")
                 }
             },
-            dismissButton = {
-                TextButton(onClick = { showDatePicker = false }) {
-                    Text("Cancelar")
-                }
-            }
+            dismissButton = { TextButton(onClick = viewModel::onDatePickerDismiss) { Text("Cancelar") } }
         ) {
             DatePicker(state = datePickerState)
         }
     }
 
+
     // bottomsheet for category
-    if (showCategorySheet) {
-        ModalBottomSheet(
-            onDismissRequest = {showCategorySheet = false},
-            sheetState = categorySheetState
-        ) {
+    if (uiState.isCategorySheetVisible){
+        ModalBottomSheet(onDismissRequest = viewModel::onCategoryPickerDismiss) {
             LazyColumn {
-                items (categoryList) { categoryItem ->
+                items(uiState.categoryList) {category ->
                     ListItem(
-                        headlineContent = {Text(categoryItem.name)},
-                        modifier = Modifier.clickable{
-                            category = categoryItem
-                            showCategorySheet = false
-                        }
+                        headlineContent = {Text(category.name)},
+                        modifier = Modifier.clickable{viewModel.onExpanseSelectedCategory(category)}
                     )
                 }
             }
         }
     }
-
     // bottomsheet for payment method
-    if (showPaymentMethodSheet) {
-        ModalBottomSheet(
-            onDismissRequest = {showPaymentMethodSheet = false},
-            sheetState = paymentMethodSheetState
-        ) {
+    if (uiState.isPaymentMethodSheetVisible) {
+        ModalBottomSheet(onDismissRequest = viewModel::onPaymentMethodPickerDismiss) {
             LazyColumn {
-                items(paymentMethodList) {paymentMethodItem ->
+                items(uiState.paymentMethodList) {paymentMethodItem ->
                     ListItem(
                         headlineContent = {Text(paymentMethodItem.name)},
-                        modifier = Modifier.clickable{
-                            paymentMethod = paymentMethodItem
-                            showPaymentMethodSheet = false
-                        }
+                        modifier = Modifier.clickable{viewModel.onExpanseSelectedPaymentMethod(paymentMethodItem)}
                     )
                 }
             }
@@ -169,68 +143,73 @@ fun AddExpenseDialog(
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Bold
                 )
+
                 OutlinedTextField(
-                    value = expense,
-                    onValueChange = { expense = it },
+                    value = uiState.expanseValue,
+                    onValueChange = viewModel::onExpanseValueChanged,
                     label = { Text("Valor") },
                     prefix = { Text("R$:") },
                     modifier = Modifier.fillMaxWidth(),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                     singleLine = true
                 )
+
                 PickerField(
                     label = "Forma de pagemento",
-                    value = paymentMethod?.name ?: "Selecione uma forma de pagemento",
+                    value = uiState.expanseSelectedPaymentMethod?.displayName ?: "Selecione uma forma de pagemento",
                     icon = {
                         Icon(
                             painter = painterResource(id = R.drawable.outline_wallet_24),
                             contentDescription = "Icone de carteira"
                         )
                     },
-                    onClick = {/*TODO */ } // dropdownmenu for categorys
+                    onClick = viewModel::onPaymentMethodPicker
                 )
                 PickerField(
                     label = "Categoria",
-                    value = category?.name ?: "Selecione uma categoria",
+                    value = uiState.expanseSelectedCategory?.name ?: "Selecione uma categoria",
                     icon = {
                         Icon(
                             painter = painterResource(id = R.drawable.outline_shopping_cart_24),
                             contentDescription = "Icone da categoria"
                         )
                     },
-                    onClick = {/* TODO */ }
+                    onClick = viewModel::onCategoryPicker
                 )
-                val formattedDateText = remember(selectedDate) {
-                    DateTimeFormatter.ofPattern("dd/MM/yyyy").format(selectedDate)
+
+                val formattedDateText = remember(uiState.expanseSelectedDate) {
+                    DateTimeFormatter.ofPattern("dd/MM/yyyy").format(uiState.expanseSelectedDate)
                 }
                 PickerField(
                     label = "Data",
-                    value = formattedDateText.ifEmpty { "Selecione uma data" },
+                    value = formattedDateText,
                     icon = {
                         Icon(
                             painter = painterResource(id = R.drawable.outline_calendar_today_24),
                             contentDescription = "Icone de calendario"
                         )
                     },
-                    onClick = { showDatePicker = true }
+                    onClick = viewModel::onOpenDatePicker
                 )
+
                 OutlinedTextField(
-                    value = description,
-                    onValueChange = { description = it },
+                    value = uiState.expanseDescription,
+                    onValueChange = viewModel::onExpanseDescriptionChanged,
                     label = { Text("Descrição") },
                     placeholder = { Text("Breve descriçao do motivo da compra:") },
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(100.dp),
                 )
-                //error if the fields are empty
-                if(errorMessage != null) {
+
+                if (uiState.errorMessage != null) {
                     Text(
-                        text = errorMessage!!,
+                        text = uiState.errorMessage!!,
                         color = MaterialTheme.colorScheme.error,
                         style = MaterialTheme.typography.bodySmall
                     )
                 }
+
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
@@ -242,26 +221,7 @@ fun AddExpenseDialog(
                     ) {
                         Text("Cancelar")
                     }
-                    Button(
-                        onClick = {
-                            val valueConverted = expense.replace(",", ".").toBigDecimalOrNull()
-                            val currentCategory = category
-                            val currentPaymentMethod = paymentMethod
-                            if(valueConverted != null && category != null && paymentMethod != null) {
-                                val newExpanse = Expense(
-                                    value = valueConverted,
-                                    description = description,
-                                    category = currentCategory,
-                                    paymentMethod = currentPaymentMethod,
-                                    date = selectedDate
-
-                                )
-                                onSaveClick(newExpanse)
-                            } else {
-                                errorMessage = "Preencha todos os campos"
-                            }
-
-                        }) {
+                    Button(onClick = {viewModel.onSaveTapped(onSaveClick) }) {
                         Text("Salvar")
                     }
                 }
@@ -269,7 +229,6 @@ fun AddExpenseDialog(
         }
     }
 }
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PickerField(
