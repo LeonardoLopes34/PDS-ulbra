@@ -5,6 +5,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import com.example.controlegasto.presentation.home.HomeScreen
+import com.example.controlegasto.presentation.navigation.MainApp
 import com.example.controlegasto.presentation.theme.ControleGastoTheme
 
 class MainActivity : ComponentActivity() {
@@ -13,7 +14,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             ControleGastoTheme {
-                HomeScreen()
+                MainApp()
             }
         }
     }

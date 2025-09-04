@@ -1,4 +1,4 @@
-package com.example.controlegasto.presentation.viewmodels
+package com.example.controlegasto.presentation.add_expense
 
 import androidx.lifecycle.ViewModel
 import com.example.controlegasto.domain.entities.Category
@@ -79,7 +79,7 @@ class AddExpanseViewModel: ViewModel() {
         _uiState.update { it.copy(isPaymentMethodSheetVisible = true) }
     }
 
-    fun onSaveTapped(onSaveSucess: (Expense) -> Unit) {
+    fun onSaveTapped(onSaveSuccess: (Expense) -> Unit) {
         val numValue = _uiState.value.expanseValue.replace(",", ".").toBigDecimalOrNull()
         val currentCategory = _uiState.value.expanseSelectedCategory
         val currentPaymentMethod = _uiState.value.expanseSelectedPaymentMethod
@@ -91,13 +91,13 @@ class AddExpanseViewModel: ViewModel() {
         val newExpense = Expense(
             value = numValue,
             description = _uiState.value.expanseDescription,
-            category = currentCategory,
+            categoryId = currentCategory.id,
             paymentMethod = currentPaymentMethod,
             date = _uiState.value.expanseSelectedDate
         )
 
         _uiState.update { it.copy(errorMessage = null) }
-        onSaveSucess(newExpense)
+        onSaveSuccess(newExpense)
 
     }
     // get category and payment methods from repository

@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -11,6 +12,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -36,27 +40,29 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.vector.Path
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.controlegasto.presentation.dialogs.AddExpenseDialog
+import com.example.controlegasto.presentation.add_expense.AddExpenseDialog
+import com.example.controlegasto.presentation.cards.ExpenseCard
 import com.example.controlegasto.presentation.theme.ButtonColor
 import com.example.controlegasto.presentation.theme.ControleGastoTheme
 import com.example.controlegasto.presentation.theme.LightBlue
 import com.example.controlegasto.presentation.theme.LightBlue2
 import com.example.controlegasto.presentation.theme.TextColorTotal
-import com.example.controlegasto.presentation.viewmodels.HomeViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
     modifier: Modifier = Modifier,
-    viewModel: HomeViewModel = viewModel()
+    viewModel: HomeViewModel = viewModel(factory = HomeViewModelFactory)
 ) {
 
     val uiState by viewModel.uiState.collectAsState()
+    val expenses by viewModel.expensesList.collectAsState()
 
     if(uiState.isAddExpanseDialogVisible) {
         AddExpenseDialog(
@@ -68,12 +74,6 @@ fun HomeScreen(
         )
     }
 
-    var selectedItemIndex by remember { mutableIntStateOf(0) }
-    val navItems = listOf(
-        "inicio" to Icons.Default.Home,
-        "Relatorios" to Icons.Default.Search,
-        "Configurações" to Icons.Default.Settings
-    )
     Scaffold(
         containerColor = LightBlue2,
         modifier = modifier,
@@ -85,23 +85,6 @@ fun HomeScreen(
                 ),
                 title = { Text("Menu") }
             )
-        },
-        bottomBar = {
-            BottomAppBar {
-                navItems.forEachIndexed { index, item ->
-                    NavigationBarItem(
-                        selected = (selectedItemIndex == index),
-                        onClick = { selectedItemIndex = index },
-                        icon = {
-                            Icon(
-                                imageVector = item.second,
-                                contentDescription = item.first
-                            )
-                        },
-                        label = { Text(text = item.first) }
-                    )
-                }
-            }
         },
         floatingActionButton = {
             FloatingActionButton(
@@ -137,31 +120,21 @@ fun HomeScreen(
                 ) {
                     Text("Teste")
                 }
-                Row(   //trocar essa row por uma lazyrow para evitar os cards de ficarem espremidos
+                LazyColumn(   //trocar essa row por uma lazyrow para evitar os cards de ficarem espremidos
                     modifier = Modifier
                         .fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    contentPadding = PaddingValues(horizontal = 16.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    HomeCategoryCard(
-                        "Categoria",
-                        MaterialTheme.colorScheme.error,
-                        modifier = Modifier.weight(1f)
-                    )
-                    HomeCategoryCard(
-                        "Quiosque",
-                        MaterialTheme.colorScheme.error,
-                        modifier = Modifier.weight(1f)
-                    )
-                    HomeCategoryCard(
-                        "Carro",
-                        MaterialTheme.colorScheme.error,
-                        modifier = Modifier.weight(1f)
-                    )
-                    HomeCategoryCard(
-                        "Casa",
-                        MaterialTheme.colorScheme.error,
-                        modifier = Modifier.weight(1f)
-                    )
+                   itemsIndexed(expenses) {index, expense ->
+                       ExpenseCard(
+                           expanseNumeration = index + 1,
+                           expanseTotal = expense.value,
+                           description = expense.description,
+                           category = "teste", //get category with categoryid
+                           modifier = Modifier
+                       )
+                   }
                 }
                 Spacer(modifier = Modifier.height(15.dp))
                 Column(

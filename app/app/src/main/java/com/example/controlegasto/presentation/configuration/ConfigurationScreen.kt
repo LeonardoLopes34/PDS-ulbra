@@ -66,7 +66,7 @@ fun ConfigurationScreen(modifier: Modifier = Modifier) {
                 ),
                 title = {Text("Configurações")},
                 navigationIcon = {
-                    IconButton(onClick = {/* TODO */}) {
+                    IconButton(onClick = {/* TODO button to go back to mainscreen*/}) {
                         Icon(
                             imageVector = Icons.Default.ArrowBack,
                             contentDescription = "Icone de voltar"
@@ -129,7 +129,7 @@ fun ConfigurationScreen(modifier: Modifier = Modifier) {
                     shape = RoundedCornerShape(12.dp),
                     elevation = CardDefaults.cardElevation(0.dp),
                     colors = CardDefaults.cardColors(containerColor = Color.White),
-                    onClick = {/* TODO  */}
+                    onClick = {/* TODO add custom category  */}
                     //receber a cor pela cor da categoria
                 ) {
                     Row(

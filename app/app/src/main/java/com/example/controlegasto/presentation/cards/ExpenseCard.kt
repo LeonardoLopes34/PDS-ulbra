@@ -91,14 +91,14 @@ fun ExpenseCard(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.End
             ) {
-                IconButton(onClick = {/* TODO */},
+                IconButton(onClick = {/* TODO method to edit expense */},
                     modifier = Modifier.size(28.dp)) {
                     Icon(
                         Icons.Default.Edit,
                         contentDescription = "Editar Despesa"
                     )
                 }
-                IconButton(onClick = {/* TODO */},
+                IconButton(onClick = {/* TODO method to delete expense */},
                     modifier = Modifier.size(28.dp)) {
                     Icon(
                         Icons.Default.Delete,

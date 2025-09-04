@@ -65,7 +65,7 @@ fun ReportScreen(modifier: Modifier = Modifier) {
                 ),
                 title = {Text("Relatórios")},
                 navigationIcon = {
-                    IconButton(onClick = {/*TODO*/}) {
+                    IconButton(onClick = {/*TODO button to return to home screen*/ }) {
                         Icon(
                             imageVector = Icons.Default.ArrowBack,
                             contentDescription = "Icone de voltar"
@@ -94,7 +94,7 @@ fun ReportScreen(modifier: Modifier = Modifier) {
         floatingActionButton = {
             FloatingActionButton(
                 containerColor = ButtonColor,
-                onClick = {/* TODO */},
+                onClick = {/* TODO add expense button*/},
                 modifier = Modifier.size(80.dp),
             ) {
                 Icon(
