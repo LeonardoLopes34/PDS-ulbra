@@ -49,12 +49,7 @@ import com.example.controlegasto.presentation.theme.LightBlue2
 @Composable
 fun ConfigurationScreen(modifier: Modifier = Modifier) {
     val borderColor = MaterialTheme.colorScheme.surfaceTint
-    var selectedItemIndex by remember { mutableIntStateOf(0) }
-    val navItems = listOf( //placeholder da bottom
-        "Inicio" to Icons.Default.Home,
-        "Relatorios" to Icons.Default.Search,
-        "Configurações" to Icons.Default.Settings
-    )
+
     Scaffold(
         containerColor = LightBlue2,
         modifier = Modifier,
@@ -74,23 +69,6 @@ fun ConfigurationScreen(modifier: Modifier = Modifier) {
                     }
                 }
             )
-        },
-        bottomBar = {
-            BottomAppBar {
-                navItems.forEachIndexed { index, item ->
-                    NavigationBarItem(
-                        selected = (selectedItemIndex == index),
-                        onClick = {selectedItemIndex = index},
-                        icon = {
-                            Icon(
-                                imageVector = item.second,
-                                contentDescription = item.first
-                            )
-                        },
-                        label = { Text(text = item.first) }
-                    )
-                }
-            }
         },
         content = {innerPadding ->
             Column(

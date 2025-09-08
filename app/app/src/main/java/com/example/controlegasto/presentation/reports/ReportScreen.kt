@@ -48,12 +48,6 @@ import com.example.controlegasto.presentation.theme.TextColorTotal
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ReportScreen(modifier: Modifier = Modifier) {
-    var selectedItemIndex by remember { mutableIntStateOf(0) }
-    val navItems = listOf(  //placeholder da bottomBar Navegacao
-        "Inicio" to Icons.Default.Home,
-        "Relatorios" to Icons.Default.Search,
-        "Configurações" to Icons.Default.Settings
-    )
     Scaffold (
         containerColor = LightBlue2,
         modifier = Modifier,
@@ -73,23 +67,6 @@ fun ReportScreen(modifier: Modifier = Modifier) {
                     }
                 }
             )
-        },
-        bottomBar = {
-            BottomAppBar {
-                navItems.forEachIndexed { index, item ->
-                    NavigationBarItem(
-                        selected = (selectedItemIndex == index),
-                        onClick = {selectedItemIndex = index},
-                        icon = {
-                            Icon(
-                                imageVector = item.second,
-                                contentDescription = item.first
-                            )
-                        },
-                        label = { Text(text = item.first)}
-                    )
-                }
-            }
         },
         floatingActionButton = {
             FloatingActionButton(

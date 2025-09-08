@@ -19,8 +19,6 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -45,7 +43,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.controlegasto.R
 import com.example.controlegasto.domain.entities.Expense
@@ -55,7 +52,7 @@ import java.time.format.DateTimeFormatter
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AddExpenseDialog(
+fun AddExpenseSheet(
     onDismissRequest: () -> Unit,
     onSaveClick: (Expense) -> Unit,
     viewModel: AddExpanseViewModel = viewModel()
@@ -110,7 +107,7 @@ fun AddExpenseDialog(
             LazyColumn {
                 items(uiState.paymentMethodList) {paymentMethodItem ->
                     ListItem(
-                        headlineContent = {Text(paymentMethodItem.name)},
+                        headlineContent = {Text(paymentMethodItem.displayName)},
                         modifier = Modifier.clickable{viewModel.onExpanseSelectedPaymentMethod(paymentMethodItem)}
                     )
                 }
@@ -119,11 +116,6 @@ fun AddExpenseDialog(
     }
 
 
-    Dialog(onDismissRequest = onDismissRequest) {
-        Card(
-            shape = RoundedCornerShape(16.dp),
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
-        ) {
             Column(
                 modifier = Modifier.padding(24.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp),
@@ -218,8 +210,9 @@ fun AddExpenseDialog(
                 }
             }
         }
-    }
-}
+
+
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PickerField(
@@ -271,6 +264,6 @@ fun AddExpenseDialogPreview() {
             .background(Color.Black.copy(alpha = 0.6f)),
         contentAlignment = Alignment.Center
     ) {
-        AddExpenseDialog(onDismissRequest = {}, onSaveClick = {})
+        AddExpenseSheet(onDismissRequest = {}, onSaveClick = {})
     }
 }
