@@ -1,12 +1,18 @@
 package com.example.controlegasto.presentation.add_expense
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.CreationExtras
+import com.example.controlegasto.ExpenseControlApplication
+import com.example.controlegasto.data.repository.CategoryRepository
 import com.example.controlegasto.domain.entities.Category
 import com.example.controlegasto.domain.entities.Expense
 import com.example.controlegasto.domain.entities.PaymentMethod
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import java.time.LocalDate
 
 data class AddExpanseUiState(
@@ -23,7 +29,7 @@ data class AddExpanseUiState(
     val paymentMethodList: List<PaymentMethod> = emptyList()
 )
 
-class AddExpanseViewModel: ViewModel() {
+class AddExpanseViewModel(private val categoryRepository: CategoryRepository): ViewModel() {
     private val _uiState = MutableStateFlow(AddExpanseUiState())
     val uiState = _uiState.asStateFlow()
 
@@ -32,10 +38,15 @@ class AddExpanseViewModel: ViewModel() {
     }
 
     init {
-        _uiState.update {
-            it.copy(
-                paymentMethodList = PaymentMethod.entries.toList(),
-            )
+        _uiState.update { it.copy(paymentMethodList = PaymentMethod.entries.toList())}
+        loadCategories()
+    }
+
+    private fun loadCategories() {
+        viewModelScope.launch {
+            categoryRepository.getAllCategories().collect { categoriesFromDb ->
+                _uiState.update { it.copy(categoryList = categoriesFromDb) }
+            }
         }
     }
 
@@ -101,4 +112,19 @@ class AddExpanseViewModel: ViewModel() {
 
     }
     // get category and payment methods from repository
+}
+
+
+object AddExpenseViewModelFactory : ViewModelProvider.Factory {
+    override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
+        val application = checkNotNull(extras[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY])
+
+        val categoryRepository = (application as ExpenseControlApplication).categoryRepository
+
+        if (modelClass.isAssignableFrom(AddExpanseViewModel::class.java)) {
+            @Suppress("UNCHECKED_CAST")
+            return AddExpanseViewModel(categoryRepository) as T
+        }
+        throw IllegalArgumentException("Unknown ViewModel class")
+    }
 }

@@ -55,7 +55,7 @@ import java.time.format.DateTimeFormatter
 fun AddExpenseSheet(
     onDismissRequest: () -> Unit,
     onSaveClick: (Expense) -> Unit,
-    viewModel: AddExpanseViewModel = viewModel()
+    viewModel: AddExpanseViewModel = viewModel(factory = AddExpenseViewModelFactory)
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
