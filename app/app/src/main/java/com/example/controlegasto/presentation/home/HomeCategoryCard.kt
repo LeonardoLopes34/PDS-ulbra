@@ -20,11 +20,11 @@ import com.example.controlegasto.presentation.theme.ControleGastoTheme
 import com.example.controlegasto.presentation.theme.LightBlue2
 
 @Composable
-fun HomeCategoryCard(category: String, color: Color, modifier: Modifier = Modifier) {
+fun HomeCategoryCard(category: String, categoryColor: Color, modifier: Modifier = Modifier) {
     Card(
-        modifier = modifier.defaultMinSize(minHeight = 40.dp),
+        modifier = Modifier.defaultMinSize(minHeight = 40.dp),
         elevation = CardDefaults.cardElevation(4.dp),
-        colors = CardDefaults.cardColors(color, // cor teste, depois mudar para receber a cor atraves da dataclass da categoria
+        colors = CardDefaults.cardColors(categoryColor, // cor teste, depois mudar para receber a cor atraves da dataclass da categoria
             )
     ) {
         Column(
