@@ -21,7 +21,10 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Button
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
+import androidx.compose.material3.Divider
+import androidx.compose.material3.DividerDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
@@ -97,6 +100,11 @@ fun AddExpenseSheet(
                         headlineContent = {Text(category.name)},
                         modifier = Modifier.clickable{viewModel.onExpanseSelectedCategory(category)}
                     )
+                    HorizontalDivider(
+                        modifier = Modifier.padding(horizontal = 16.dp),
+                        thickness = DividerDefaults.Thickness,
+                        color = DividerDefaults.color
+                    )
                 }
             }
         }
@@ -109,6 +117,11 @@ fun AddExpenseSheet(
                     ListItem(
                         headlineContent = {Text(paymentMethodItem.displayName)},
                         modifier = Modifier.clickable{viewModel.onExpanseSelectedPaymentMethod(paymentMethodItem)}
+                    )
+                    HorizontalDivider(
+                        modifier = Modifier.padding(horizontal = 16.dp),
+                        thickness = DividerDefaults.Thickness,
+                        color = DividerDefaults.color
                     )
                 }
             }

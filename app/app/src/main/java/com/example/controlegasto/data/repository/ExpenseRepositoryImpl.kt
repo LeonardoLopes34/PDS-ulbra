@@ -3,6 +3,7 @@ package com.example.controlegasto.data.repository
 import com.example.controlegasto.data.dao.ExpenseDao
 import com.example.controlegasto.domain.entities.Expense
 import kotlinx.coroutines.flow.Flow
+import java.time.LocalDate
 
 class ExpenseRepositoryImpl(private val expenseDao: ExpenseDao) : ExpenseRepository {
 
@@ -25,6 +26,12 @@ class ExpenseRepositoryImpl(private val expenseDao: ExpenseDao) : ExpenseReposit
     }
 
     override fun getExpenseByCategory(categoryId: Int): Flow<List<Expense>> = expenseDao.getExpenseByCategory(categoryId)
+
+
+    override fun getExpensesBetweenDates(startDate: LocalDate, endDate: LocalDate): Flow<List<Expense>> {
+        return expenseDao.getExpensesBetweenDates(startDate, endDate)
+    }
+
 
     //methods for get expense by date, category
 }

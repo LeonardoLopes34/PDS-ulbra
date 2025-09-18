@@ -6,12 +6,15 @@ import androidx.lifecycle.viewmodel.CreationExtras
 import com.example.controlegasto.ExpenseControlApplication
 import com.example.controlegasto.data.repository.CategoryRepository
 import com.example.controlegasto.data.repository.ExpenseRepository
+import com.example.controlegasto.domain.entities.Category
 import com.example.controlegasto.domain.entities.Expense
+import com.example.controlegasto.presentation.reports.ExpenseWithCategory
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.WhileSubscribed
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -40,12 +43,16 @@ class HomeViewModel(private val expenseRepository: ExpenseRepository, private va
         }
     }
 
-    val expensesList: StateFlow<List<Expense>> = expenseRepository.getAllExpenses()
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
-            initialValue = emptyList()
-        )
+
+    val expensesWithCategory: StateFlow<List<ExpenseWithCategory>> =
+        expenseRepository.getAllExpenses()
+            .combine(categoryRepository.getAllCategories()) { allExpenses, allCategories ->
+                allExpenses.map { expense ->
+                    val category = allCategories.find { it.id == expense.categoryId } ?: Category.default()
+                    ExpenseWithCategory(expense, category)
+                }
+            }
+            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
 }
 

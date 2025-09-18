@@ -28,33 +28,36 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.controlegasto.domain.entities.Category
+import com.example.controlegasto.domain.entities.Expense
+import com.example.controlegasto.domain.entities.PaymentMethod
+import com.example.controlegasto.presentation.reports.ExpenseWithCategory
 import com.example.controlegasto.presentation.theme.ControleGastoTheme
 import com.example.controlegasto.presentation.theme.LightBlue2
 import java.math.BigDecimal
 import java.text.NumberFormat
+import java.time.LocalDate
 import java.util.Locale
 
 @Composable
 fun ExpenseCard(
-    expanseNumeration: Int,
-    expanseTotal: BigDecimal,
-    description: String,    // receber cor e nome da categoria de uma possivel dataclass da categoria
-    category: String,
+    item: ExpenseWithCategory,
+    expenseNumeration: Int,
+    onEditClick: () -> Unit,
+    onDeleteClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
 
     val currency = NumberFormat.getCurrencyInstance(Locale("pt", "BR"))
 
     Card(
-        modifier = Modifier.defaultMinSize(80.dp),
+        modifier = Modifier.fillMaxWidth(),
         elevation = CardDefaults.cardElevation(6.dp),
-        colors = CardDefaults.cardColors(LightBlue2)
+        colors = CardDefaults.cardColors(Color(item.category.color.toULong()))
     ) {
         Column(
-            modifier = Modifier
-                .padding(10.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -62,44 +65,47 @@ fun ExpenseCard(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
-                    text = "N.${expanseNumeration}",
+                    text = "N.${expenseNumeration}",
                     fontSize = 20.sp,
-                    style = MaterialTheme.typography.labelMedium,
-                    fontWeight = FontWeight.Black
+                    style = MaterialTheme.typography.bodySmall,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White
                 )
                 Text(
-                    text = currency.format(expanseTotal),
-                    fontSize = 25.sp,
+                    text = currency.format(item.expense.value),
+                    color = Color.White,
                     style = MaterialTheme.typography.labelMedium,
-                    fontWeight = FontWeight.Black
+                    fontWeight = FontWeight.ExtraBold
                 )
                 AssistChip(
                     onClick = {/* TODO */ },
-                    label = { Text(category, fontWeight = FontWeight.Bold) },
+                    label = { Text(item.category.name, fontWeight = FontWeight.Bold) },
                     colors = AssistChipDefaults.assistChipColors(
-                        containerColor = MaterialTheme.colorScheme.error, //cor teste susbtiuir pela cor da categoria depois
+                        containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.2f), /*TODO cor teste susbtiuir pela cor da categoria depois */
                         labelColor = Color.White
                     )
                 )
             }
-            Text(
-                text = description,
-                fontSize = 20.sp,
-                style = MaterialTheme.typography.labelMedium
-            )
+            if(item.expense.description.isNotBlank()){
+                Text(
+                    text = item.expense.description,
+                    color = Color.White.copy(alpha = 0.8f),
+                    style = MaterialTheme.typography.labelMedium
+                )
+            }
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.End
             ) {
-                IconButton(onClick = {/* TODO method to edit expense */},
-                    modifier = Modifier.size(28.dp)) {
+                IconButton(onClick = onEditClick,
+                    modifier = Modifier.size(32.dp)) {
                     Icon(
                         Icons.Default.Edit,
                         contentDescription = "Editar Despesa"
                     )
                 }
-                IconButton(onClick = {/* TODO method to delete expense */},
-                    modifier = Modifier.size(28.dp)) {
+                IconButton(onClick = onDeleteClick,
+                    modifier = Modifier.size(32.dp)) {
                     Icon(
                         Icons.Default.Delete,
                         contentDescription = "Deletar Despesa"
@@ -113,7 +119,23 @@ fun ExpenseCard(
 @Preview(showBackground = true)
 @Composable
 fun ExpanseCardPreview(modifier: Modifier = Modifier) {
+    val testCategory = Category(id = 1, name = "Pessoal", color = Color.Red.value.toLong())
+    val testExpense = Expense(
+        id = 1,
+        value = BigDecimal("230.20"),
+        description = "Compra de teste para o preview do card",
+        categoryId = 1,
+        paymentMethod = PaymentMethod.CREDIT_CARD,
+        date = LocalDate.now()
+    )
+    val testItem = ExpenseWithCategory(expense = testExpense, category = testCategory)
+
     ControleGastoTheme {
-        ExpenseCard(1, BigDecimal("230.20"), "compra Teste", "Pessoal" )
+        ExpenseCard(
+            item = testItem,
+            expenseNumeration = 1,
+            onEditClick = {},
+            onDeleteClick = {}
+        )
     }
 }

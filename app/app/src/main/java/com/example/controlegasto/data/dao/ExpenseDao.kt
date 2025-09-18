@@ -7,6 +7,7 @@ import androidx.room.Query
 import androidx.room.Update
 import com.example.controlegasto.domain.entities.Expense
 import kotlinx.coroutines.flow.Flow
+import java.time.LocalDate
 
 @Dao
 interface ExpenseDao {
@@ -28,4 +29,7 @@ interface ExpenseDao {
 
     @Query("SELECT * FROM expenses WHERE categoryId = :categoryId ORDER BY date DESC")
     fun getExpenseByCategory(categoryId: Int): Flow<List<Expense>>
+
+    @Query("SELECT * FROM expenses WHERE date BETWEEN :startDate AND :endDate ORDER BY date DESC")
+    fun getExpensesBetweenDates(startDate: LocalDate, endDate: LocalDate): Flow<List<Expense>>
 }

@@ -52,7 +52,8 @@ fun HomeScreen(
 ) {
 
     val uiState by viewModel.uiState.collectAsState()
-    val expenses by viewModel.expensesList.collectAsState()
+    val expensesWithCategory by viewModel.expensesWithCategory.collectAsState()
+
 
     if(uiState.isAddExpanseDialogVisible) {
         ModalBottomSheet(
@@ -120,12 +121,12 @@ fun HomeScreen(
                     contentPadding = PaddingValues(horizontal = 16.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                   itemsIndexed(expenses) {index, expense ->
+                   itemsIndexed(expensesWithCategory) {index, item ->
                        ExpenseCard(
-                           expanseNumeration = index + 1,
-                           expanseTotal = expense.value,
-                           description = expense.description,
-                           category = "teste", //get category with categoryid
+                           item = item,
+                           expenseNumeration = index + 1,
+                           onEditClick = { /* TODO: viewModel.onEditExpense(item.expense) */ },
+                           onDeleteClick = { /* TODO: viewModel.onDeleteExpense(item.expense) */ },
                            modifier = Modifier
                        )
                    }
