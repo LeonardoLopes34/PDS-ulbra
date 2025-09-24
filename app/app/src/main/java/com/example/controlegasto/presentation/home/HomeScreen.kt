@@ -1,5 +1,6 @@
 package com.example.controlegasto.presentation.home
 
+import android.app.AlertDialog
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -38,11 +39,16 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.controlegasto.presentation.add_expense.AddExpenseSheet
 import com.example.controlegasto.presentation.cards.ExpenseCard
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.OutlinedButton
 import com.example.controlegasto.presentation.theme.ButtonColor
 import com.example.controlegasto.presentation.theme.ControleGastoTheme
 import com.example.controlegasto.presentation.theme.LightBlue
 import com.example.controlegasto.presentation.theme.LightBlue2
 import com.example.controlegasto.presentation.theme.TextColorTotal
+import java.math.BigDecimal
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -67,6 +73,15 @@ fun HomeScreen(
                 }
             )
         }
+    }
+
+    val expenseToDelete = uiState.expenseForDeletion
+    if (expenseToDelete != null) {
+        DeleteExpenseConfirmationDialog(
+            expenseValue = expenseToDelete.value,
+            onConfirm = viewModel::confirmDelete,
+            onDismiss = viewModel::cancelDelete
+        )
     }
 
     Scaffold(
@@ -125,8 +140,8 @@ fun HomeScreen(
                        ExpenseCard(
                            item = item,
                            expenseNumeration = index + 1,
-                           onEditClick = { /* TODO: viewModel.onEditExpense(item.expense) */ },
-                           onDeleteClick = { /* TODO: viewModel.onDeleteExpense(item.expense) */ },
+                           onEditClick = { viewModel.onEditExpense(item.expense) },
+                           onDeleteClick = { viewModel.requestDeleteConfirmation(item.expense) },
                            modifier = Modifier
                        )
                    }
@@ -144,6 +159,34 @@ fun HomeScreen(
                     )
                 }
                 Spacer(modifier = Modifier.weight(1f))
+            }
+        }
+    )
+}
+
+@Composable
+fun DeleteExpenseConfirmationDialog(
+    expenseValue: BigDecimal,
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title= { Text("Confirmar Exclusão")},
+        text = {
+            Text("Tem a certeze de que deseja apagar o gasto com o valor \"$expenseValue\"? Esta ação não pode ser desfeita")
+        },
+        confirmButton = {
+            Button(
+                onClick = onConfirm,
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
+            ) {
+                Text("Apagar")
+            }
+        },
+        dismissButton = {
+            OutlinedButton(onClick = onDismiss) {
+                Text("Cancelar")
             }
         }
     )

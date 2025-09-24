@@ -44,6 +44,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -58,10 +59,10 @@ import com.example.controlegasto.presentation.theme.TextColorTotal
 @Composable
 fun ReportScreen(
     modifier: Modifier = Modifier,
-    viewModel: ReportViewModel = viewModel(factory = ReportViewModelFactory)
+    viewModel: ReportViewModel = viewModel(factory = ReportViewModel.ReportViewModelFactory)
 ) {
     val uiState by viewModel.uiState.collectAsState()
-    val expenseWithCategory by viewModel.expenseWithCategory.collectAsState()
+    val expenses by viewModel.filteredExpenses.collectAsState()
 
 
 
@@ -108,7 +109,7 @@ fun ReportScreen(
                 Text(
                     "Total do dia: R$00000000",
                     style = MaterialTheme.typography.titleLarge,
-                    color = TextColorTotal
+                    fontWeight = FontWeight.ExtraBold
                 )
                 Box(
                     modifier = Modifier
@@ -143,7 +144,7 @@ fun ReportScreen(
                     contentPadding = PaddingValues(16.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    itemsIndexed(expenseWithCategory) {index, item ->
+                    itemsIndexed(expenses) {index, item ->
                         ExpenseCard(
                             item = item,
                             expenseNumeration = index + 1,

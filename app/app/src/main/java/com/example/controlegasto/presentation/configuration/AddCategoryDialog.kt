@@ -30,23 +30,32 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.example.controlegasto.domain.entities.Category
 
 @Composable
 fun CategoryAddDialog(
+    categoryToEdit: Category?,
     onDismissRequest: () -> Unit,
     onSaveCategory: (name: String, color: Color) -> Unit
 ) {
-    var categoryName by remember { mutableStateOf("") }
+    var categoryName by remember ( categoryToEdit ) {mutableStateOf(categoryToEdit?.name ?: "")}
     val colorOptions = listOf(
-        Color(0xFFF44336), Color(0xFFE91E63), Color(0xFF9C27B0), Color(0xFF673AB7),
-        Color(0xFF3F51B5), Color(0xFF2196F3), Color(0xFF00BCD4), Color(0xFF4CAF50),
-        Color(0xFFFF9800), Color(0xFF795548)
+        Color(0xFFFD1303), Color(0xFF1D6200), Color(0xFFD501FC), Color(0xFF673AB7),
+        Color(0xFF3F51B5), Color(0xFFEAE00E), Color(0xFF00BCD4), Color(0xFF7EF581),
+        Color(0xFFFF9800), Color(0xFF62463C)
     )
-    var selectedColor by remember { mutableStateOf(colorOptions.first()) }
+    var selectedColor by remember(categoryToEdit) {
+        mutableStateOf(
+            if (categoryToEdit != null) Color(categoryToEdit.color.toULong())
+            else colorOptions.first()
+        )
+    }
+
+    val dialogTitle = if (categoryToEdit == null) "Nova Categoria" else "Editar Categoria"
 
     AlertDialog(
         onDismissRequest = onDismissRequest,
-        title = { Text("Nova Categoria", fontWeight = FontWeight.Bold) },
+        title = { Text(dialogTitle, fontWeight = FontWeight.Bold) },
         text = {
             Column(
                 verticalArrangement = Arrangement.spacedBy(16.dp)
@@ -114,10 +123,3 @@ private fun ColorCircle(
     )
 }
 
-@Preview
-@Composable
-fun AddCategoryDialogPreview() {
-    MaterialTheme {
-        CategoryAddDialog(onDismissRequest = {}, onSaveCategory = { _, _ -> })
-    }
-}

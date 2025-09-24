@@ -1,5 +1,6 @@
 package com.example.controlegasto.presentation.configuration
 
+import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -17,47 +18,62 @@ import kotlinx.coroutines.launch
 
 data class ConfigurationUiState(
     val isAddCategoryDialogVisible: Boolean = false,
-    val categoryForDeletion: Category? = null
+    val categoryForDeletion: Category? = null,
+    val categoryToEdit: Category? = null
 )
 
-class ConfigurationViewModel(private val categoryRepository: CategoryRepository): ViewModel() {
+class ConfigurationViewModel(private val categoryRepository: CategoryRepository) : ViewModel() {
     private val _uiState = MutableStateFlow(ConfigurationUiState())
     val uiState = _uiState.asStateFlow()
 
     fun onAddCategoryClicked() {
-        _uiState.update { it.copy(isAddCategoryDialogVisible = true)}
-    }
-    fun onAddCategoryDismiss() {
-        _uiState.update { it.copy(isAddCategoryDialogVisible = false) }
+        _uiState.update { it.copy(isAddCategoryDialogVisible = true, categoryToEdit = null) }
     }
 
-    fun onSaveCategory(category: Category) {
+    fun onAddCategoryDismiss() {
+        _uiState.update { it.copy(isAddCategoryDialogVisible = false, categoryToEdit = null) }
+    }
+
+    fun onEditCategory(category: Category) {
+        _uiState.update { it.copy(isAddCategoryDialogVisible = true, categoryToEdit = category) }
+    }
+
+    fun onSaveCategory(name: String, color: Color) {
         viewModelScope.launch {
-            categoryRepository.addCategory(category)
+            val categoryToEdit = _uiState.value.categoryToEdit
+
+            if (categoryToEdit != null) {
+                val updatedCategory = categoryToEdit.copy(
+                    name = name,
+                    color = color.value.toLong()
+                )
+                categoryRepository.updateCategory(updatedCategory)
+            } else {
+                val newCategory = Category(
+                    name = name,
+                    color = color.value.toLong()
+                )
+                categoryRepository.addCategory(newCategory)
+            }
         }
     }
+
 
     fun requestDeleteConfirmation(category: Category) {
         _uiState.update { it.copy(categoryForDeletion = category) }
     }
 
-    fun cancelDelete(){
+    fun cancelDelete() {
         _uiState.update { it.copy(categoryForDeletion = null) }
     }
 
     fun confirmDelete() {
         val categoryToDelete = _uiState.value.categoryForDeletion
-        if(categoryToDelete != null) {
+        if (categoryToDelete != null) {
             viewModelScope.launch {
                 categoryRepository.deleteCategory(categoryToDelete)
                 _uiState.update { it.copy(categoryForDeletion = null) }
             }
-        }
-    }
-
-    fun onUpdateCategory(category: Category) {
-        viewModelScope.launch {
-            categoryRepository.updateCategory(category)
         }
     }
 
@@ -70,9 +86,10 @@ class ConfigurationViewModel(private val categoryRepository: CategoryRepository)
 }
 
 
-object ConfigurationViewModelFactory: ViewModelProvider.Factory {
-    override fun <T: ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
-        val application = checkNotNull(extras[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY])
+object ConfigurationViewModelFactory : ViewModelProvider.Factory {
+    override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
+        val application =
+            checkNotNull(extras[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY])
         val categoryRepository = (application as ExpenseControlApplication).categoryRepository
         if (modelClass.isAssignableFrom(ConfigurationViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")

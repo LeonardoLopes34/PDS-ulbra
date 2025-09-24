@@ -25,13 +25,20 @@ class ExpenseRepositoryImpl(private val expenseDao: ExpenseDao) : ExpenseReposit
         expenseDao.deleteExpense(expense)
     }
 
-    override fun getExpenseByCategory(categoryId: Int): Flow<List<Expense>> = expenseDao.getExpenseByCategory(categoryId)
+    override fun getExpenseByCategory(categoryId: Int): Flow<List<Expense>> =
+        expenseDao.getExpenseByCategory(categoryId)
 
 
-    override fun getExpensesBetweenDates(startDate: LocalDate, endDate: LocalDate): Flow<List<Expense>> {
+    override fun getExpensesBetweenDates(startDate: Long, endDate: Long): Flow<List<Expense>> {
         return expenseDao.getExpensesBetweenDates(startDate, endDate)
     }
 
+    override fun getExpensesByCategoriesAndDate(
+        startDate: Long,
+        endDate: Long,
+        categoryIds: List<Int>
+    ): Flow<List<Expense>> {
+        return expenseDao.getExpensesByCategoryAndDate(startDate, endDate, categoryIds)
+    }
 
-    //methods for get expense by date, category
 }

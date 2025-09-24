@@ -1,4 +1,5 @@
 package com.example.controlegasto.presentation.home
+
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -18,28 +19,67 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlin.math.exp
 
 data class HomeUiState(
-    val isAddExpanseDialogVisible: Boolean = false
-    // other states of homescreen go here,
+    val isAddExpanseDialogVisible: Boolean = false,
+    val expenseToEdit: Expense? = null,
+    val expenseForDeletion: Expense? = null
 )
 
-class HomeViewModel(private val expenseRepository: ExpenseRepository, private val categoryRepository: CategoryRepository): ViewModel() {
-
-
+class HomeViewModel(
+    private val expenseRepository: ExpenseRepository,
+    private val categoryRepository: CategoryRepository
+) : ViewModel() {
     private val _uiState = MutableStateFlow(HomeUiState())
     val uiState = _uiState.asStateFlow()
 
     fun onAddExpanseClicked() {
-        _uiState.update { it.copy(isAddExpanseDialogVisible = true) }
+        _uiState.update { it.copy(isAddExpanseDialogVisible = true, expenseToEdit = null) }
     }
+
     fun onDialogDismiss() {
-        _uiState.update { it.copy(isAddExpanseDialogVisible = false) }
+        _uiState.update { it.copy(isAddExpanseDialogVisible = false, expenseToEdit = null) }
+    }
+
+    fun onEditExpense(expense: Expense) {
+        _uiState.update { it.copy(isAddExpanseDialogVisible = true, expenseToEdit = expense) }
     }
 
     fun onSaveExpanse(expense: Expense) {
         viewModelScope.launch {
-            expenseRepository.addExpense(expense)
+            val expenseToEdit = _uiState.value.expenseToEdit
+            if (expenseToEdit != null) {
+                val updatedExpense = expenseToEdit.copy(
+                    value = expense.value,
+                    description = expense.description,
+                    categoryId = expense.categoryId,
+                    paymentMethod = expense.paymentMethod,
+                    date = expense.date
+                )
+                expenseRepository.updateExpense(updatedExpense)
+            } else {
+                expenseRepository.addExpense(expense)
+            }
+
+        }
+    }
+
+    fun requestDeleteConfirmation(expense: Expense) {
+        _uiState.update { it.copy(expenseForDeletion = expense) }
+    }
+
+    fun cancelDelete() {
+        _uiState.update { it.copy(expenseForDeletion = null) }
+    }
+
+    fun confirmDelete() {
+        val expenseToDelete = _uiState.value.expenseForDeletion
+        if (expenseToDelete != null) {
+            viewModelScope.launch {
+                expenseRepository.deleteExpense(expenseToDelete)
+                _uiState.update { it.copy(expenseForDeletion = null) }
+            }
         }
     }
 
@@ -48,7 +88,8 @@ class HomeViewModel(private val expenseRepository: ExpenseRepository, private va
         expenseRepository.getAllExpenses()
             .combine(categoryRepository.getAllCategories()) { allExpenses, allCategories ->
                 allExpenses.map { expense ->
-                    val category = allCategories.find { it.id == expense.categoryId } ?: Category.default()
+                    val category =
+                        allCategories.find { it.id == expense.categoryId } ?: Category.default()
                     ExpenseWithCategory(expense, category)
                 }
             }
@@ -57,9 +98,10 @@ class HomeViewModel(private val expenseRepository: ExpenseRepository, private va
 }
 
 //viewmodel factory
-object HomeViewModelFactory: ViewModelProvider.Factory {
+object HomeViewModelFactory : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
-        val application = checkNotNull(extras[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY])
+        val application =
+            checkNotNull(extras[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY])
 
         val expenseRepository = (application as ExpenseControlApplication).expenseRepository
         val categoryRepository = application.categoryRepository

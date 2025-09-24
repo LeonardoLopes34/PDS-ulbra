@@ -19,12 +19,14 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import java.time.LocalDate
-import kotlin.math.exp
+import java.time.ZoneId
 
 data class ReportUiState(
     val startDate: LocalDate = LocalDate.now().minusDays(7),
     val endDate: LocalDate = LocalDate.now(),
-    val activeFilter: DateFilterType = DateFilterType.LAST_7_DAYA
+    val activeFilter: DateFilterType = DateFilterType.LAST_7_DAYS,
+    val selectedCategories: List<Category> = emptyList(),
+    val isAdvancedFilterDialogVisible: Boolean = false
 )
 
 data class ExpenseWithCategory(
@@ -51,12 +53,16 @@ class ReportViewModel(
                 newStartDate = today
             }
 
-            DateFilterType.LAST_7_DAYA -> {
+            DateFilterType.LAST_7_DAYS -> {
                 newStartDate = today.minusDays(6)
             }
 
             DateFilterType.THIS_MONTH -> {
                 newStartDate = today.withDayOfMonth(1)
+            }
+
+            DateFilterType.CUSTOM -> {
+                newStartDate = today
             }
         }
         _uiState.update {
@@ -66,36 +72,54 @@ class ReportViewModel(
                 activeFilter = filterType
             )
         }
-
-        val filteredExpenses: StateFlow<List<Expense>> = uiState.flatMapLatest { state ->
-            expenseRepository.getExpensesBetweenDates(state.startDate, state.endDate)
-        }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(500), emptyList())
     }
 
-    val expenseWithCategory: StateFlow<List<ExpenseWithCategory>> =
-        expenseRepository.getAllExpenses()
-            .combine(categoryRepository.getAllCategories()) {allExpenses, allCategories ->
-                allExpenses.map { expense ->
-                    val category = allCategories.find{it.id == expense.categoryId } ?: Category.default()
+    fun onApplyAdvancedFilter(filterState: AdvancedFilterState) {
+        _uiState.update {
+            it.copy(
+                selectedCategories = filterState.selectedCategories,
+                isAdvancedFilterDialogVisible = false
+                ) }
+    }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val filteredExpenses: StateFlow<List<ExpenseWithCategory>> = uiState.flatMapLatest { state ->
+        val startMillis = state.startDate.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
+
+        val endMillis = state.endDate.atTime(23, 59, 59).atZone(ZoneId.systemDefault()).toInstant()
+            .toEpochMilli()
+
+        val expensesFlow = if(state.selectedCategories.isEmpty()) {
+            expenseRepository.getExpensesBetweenDates(startMillis,endMillis)
+        } else {
+            val categoryIds = state.selectedCategories.map {it.id}
+            expenseRepository.getExpensesByCategoriesAndDate(startMillis, endMillis, categoryIds)
+        }
+
+            expensesFlow.combine(categoryRepository.getAllCategories()) { expenses, categories ->
+                expenses.map { expense ->
+                    val category =
+                        categories.find { it.id == expense.categoryId } ?: Category.default()
                     ExpenseWithCategory(expense, category)
                 }
             }
-            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
-}
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-object ReportViewModelFactory : ViewModelProvider.Factory {
-    override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
-        val application =
-            checkNotNull(extras[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY])
 
-        val expenseRepository = (application as ExpenseControlApplication).expenseRepository
-        val categoryRepository = application.categoryRepository
+    object ReportViewModelFactory : ViewModelProvider.Factory {
+        override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
+            val application =
+                checkNotNull(extras[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY])
 
-        if (modelClass.isAssignableFrom(ReportViewModel::class.java)) {
-            @Suppress("UNCHECKED_CAST")
-            return ReportViewModel(expenseRepository, categoryRepository) as T
+            val expenseRepository = (application as ExpenseControlApplication).expenseRepository
+            val categoryRepository = application.categoryRepository
 
+            if (modelClass.isAssignableFrom(ReportViewModel::class.java)) {
+                @Suppress("UNCHECKED_CAST")
+                return ReportViewModel(expenseRepository, categoryRepository) as T
+
+            }
+            throw IllegalArgumentException("Unknown ViewModel Class")
         }
-        throw IllegalArgumentException("Unknown ViewModel Class")
     }
 }

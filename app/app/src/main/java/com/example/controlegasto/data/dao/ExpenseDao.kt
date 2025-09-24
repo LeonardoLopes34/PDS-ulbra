@@ -31,5 +31,8 @@ interface ExpenseDao {
     fun getExpenseByCategory(categoryId: Int): Flow<List<Expense>>
 
     @Query("SELECT * FROM expenses WHERE date BETWEEN :startDate AND :endDate ORDER BY date DESC")
-    fun getExpensesBetweenDates(startDate: LocalDate, endDate: LocalDate): Flow<List<Expense>>
+    fun getExpensesBetweenDates(startDate: Long, endDate: Long): Flow<List<Expense>>
+
+    @Query("SELECT * FROM expenses WHERE date BETWEEN :startDate AND :endDate AND :categoryIds ORDER BY date DESC ")
+    fun getExpensesByCategoryAndDate(startDate: Long, endDate: Long, categoryIds: List<Int>): Flow<List<Expense>>
 }

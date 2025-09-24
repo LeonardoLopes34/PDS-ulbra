@@ -79,12 +79,14 @@ fun AddExpenseSheet(
                             Instant.ofEpochMilli(it).atZone(ZoneId.systemDefault()).toLocalDate()
                         } ?: uiState.expanseSelectedDate
                         viewModel.onExpanseDateSelected(selectedDate)
+                        viewModel.onDatePickerDismiss()
                     }
                 ) {
-                    Text("OK")
+                    Text("Ok")
                 }
             },
             dismissButton = { TextButton(onClick = viewModel::onDatePickerDismiss) { Text("Cancelar") } }
+
         ) {
             DatePicker(state = datePickerState)
         }
