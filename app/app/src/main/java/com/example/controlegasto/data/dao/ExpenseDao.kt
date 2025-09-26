@@ -6,6 +6,7 @@ import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
 import com.example.controlegasto.domain.entities.Expense
+import com.example.controlegasto.domain.entities.PaymentMethod
 import kotlinx.coroutines.flow.Flow
 import java.time.LocalDate
 
@@ -33,6 +34,12 @@ interface ExpenseDao {
     @Query("SELECT * FROM expenses WHERE date BETWEEN :startDate AND :endDate ORDER BY date DESC")
     fun getExpensesBetweenDates(startDate: Long, endDate: Long): Flow<List<Expense>>
 
-    @Query("SELECT * FROM expenses WHERE date BETWEEN :startDate AND :endDate AND :categoryIds ORDER BY date DESC ")
+    @Query("SELECT * FROM expenses WHERE date BETWEEN :startDate AND :endDate AND categoryId IN (:categoryIds) ORDER BY date DESC")
     fun getExpensesByCategoryAndDate(startDate: Long, endDate: Long, categoryIds: List<Int>): Flow<List<Expense>>
+
+    @Query("SELECT * FROM expenses WHERE date BETWEEN :startDate AND :endDate AND paymentMethod IN (:paymentMethods) ORDER BY date DESC")
+    fun getExpensesByPaymentMethodsAndDate(startDate: Long, endDate: Long, paymentMethods: List<PaymentMethod>): Flow<List<Expense>>
+
+    @Query("SELECT * FROM expenses WHERE date BETWEEN :startDate AND :endDate AND categoryId IN (:categoryIds) AND paymentMethod IN (:paymentMethods) ORDER BY date DESC")
+    fun getExpensesByAllFilters(startDate: Long, endDate: Long, categoryIds: List<Int>, paymentMethods: List<PaymentMethod>): Flow<List<Expense>>
 }

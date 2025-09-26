@@ -63,6 +63,17 @@ fun ReportScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val expenses by viewModel.filteredExpenses.collectAsState()
+    val availableCategories by viewModel.categories.collectAsState()
+    val availablePaymentMethods by viewModel.paymentMethods.collectAsState()
+
+    if (uiState.isAdvancedFilterDialogVisible) {
+        AdvancedFilterDialog(
+            onApplyClick = viewModel::onApplyAdvancedFilter,
+            onDismiss = viewModel::onDismissAdvancedFilter,
+            availableCategories = availableCategories,
+            availablePaymentMethod = availablePaymentMethods,
+        )
+    }
 
 
 
@@ -129,7 +140,13 @@ fun ReportScreen(
                     items(DateFilterType.entries) { filterType ->
                         FilterChip(
                             selected = (uiState.activeFilter == filterType),
-                            onClick = { viewModel.onFilterSelected(filterType) },
+                            onClick = {
+                                if(filterType == DateFilterType.CUSTOM) {
+                                    viewModel.onOpenAdvancedFilter()
+                                } else {
+                                    viewModel.onFilterSelected(filterType)
+                                }
+                            },
                             label = { Text(filterType.displayName) },
                             leadingIcon = if (uiState.activeFilter == filterType) {
                                 { Icon(Icons.Filled.Done, "Selecionado") }

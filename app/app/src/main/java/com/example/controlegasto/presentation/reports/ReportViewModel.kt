@@ -9,7 +9,9 @@ import com.example.controlegasto.data.repository.CategoryRepository
 import com.example.controlegasto.data.repository.ExpenseRepository
 import com.example.controlegasto.domain.entities.Category
 import com.example.controlegasto.domain.entities.Expense
+import com.example.controlegasto.domain.entities.PaymentMethod
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -26,6 +28,7 @@ data class ReportUiState(
     val endDate: LocalDate = LocalDate.now(),
     val activeFilter: DateFilterType = DateFilterType.LAST_7_DAYS,
     val selectedCategories: List<Category> = emptyList(),
+    val selectedPaymentMethods: List<PaymentMethod> = emptyList(),
     val isAdvancedFilterDialogVisible: Boolean = false
 )
 
@@ -40,6 +43,19 @@ class ReportViewModel(
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(ReportUiState())
     val uiState = _uiState.asStateFlow()
+
+    fun onOpenAdvancedFilter() {
+        _uiState.update { it.copy(isAdvancedFilterDialogVisible = true) }
+    }
+
+    fun onDismissAdvancedFilter(){
+        _uiState.update { it.copy(isAdvancedFilterDialogVisible = false) }
+    }
+
+    val categories: StateFlow<List<Category>> = categoryRepository.getAllCategories()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    val paymentMethods: StateFlow<List<PaymentMethod>> = MutableStateFlow(PaymentMethod.entries.toList()).asStateFlow()
 
 
     @OptIn(ExperimentalCoroutinesApi::class)
@@ -62,14 +78,17 @@ class ReportViewModel(
             }
 
             DateFilterType.CUSTOM -> {
-                newStartDate = today
+                _uiState.update { it.copy(activeFilter = filterType) }
+                return
             }
         }
         _uiState.update {
             it.copy(
                 startDate = newStartDate,
                 endDate = newEndDate,
-                activeFilter = filterType
+                activeFilter = filterType,
+                selectedCategories = emptyList(),
+                selectedPaymentMethods = emptyList()
             )
         }
     }
@@ -78,6 +97,7 @@ class ReportViewModel(
         _uiState.update {
             it.copy(
                 selectedCategories = filterState.selectedCategories,
+                selectedPaymentMethods = filterState.selectedPaymentMethod,
                 isAdvancedFilterDialogVisible = false
                 ) }
     }
@@ -88,12 +108,22 @@ class ReportViewModel(
 
         val endMillis = state.endDate.atTime(23, 59, 59).atZone(ZoneId.systemDefault()).toInstant()
             .toEpochMilli()
+        val categoryIds = state.selectedCategories.map{it.id}
+        val paymentMethods = state.selectedPaymentMethods
 
-        val expensesFlow = if(state.selectedCategories.isEmpty()) {
-            expenseRepository.getExpensesBetweenDates(startMillis,endMillis)
-        } else {
-            val categoryIds = state.selectedCategories.map {it.id}
-            expenseRepository.getExpensesByCategoriesAndDate(startMillis, endMillis, categoryIds)
+        val expensesFlow: Flow<List<Expense>> = when {
+            categoryIds.isNotEmpty() && paymentMethods.isNotEmpty() -> {
+                expenseRepository.getExpensesByAllFilters(startMillis, endMillis, categoryIds, paymentMethods)
+            }
+            categoryIds.isNotEmpty() -> {
+                expenseRepository.getExpensesByCategoriesAndDate(startMillis, endMillis, categoryIds)
+            }
+            paymentMethods.isNotEmpty() -> {
+                expenseRepository.getExpensesByPaymentMethodsAndDate(startMillis, endMillis, paymentMethods)
+            }
+            else -> {
+                expenseRepository.getExpensesBetweenDates(startMillis, endMillis)
+            }
         }
 
             expensesFlow.combine(categoryRepository.getAllCategories()) { expenses, categories ->
