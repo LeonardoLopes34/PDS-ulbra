@@ -272,7 +272,6 @@ fun PickerField(
 @Preview
 @Composable
 fun AddExpenseDialogPreview() {
-    // Fundo escuro para o preview se destacar
     Box(
         modifier = Modifier
             .fillMaxSize()

@@ -69,9 +69,11 @@ fun ReportScreen(
     if (uiState.isAdvancedFilterDialogVisible) {
         AdvancedFilterDialog(
             onApplyClick = viewModel::onApplyAdvancedFilter,
-            onDismiss = viewModel::onDismissAdvancedFilter,
+            onDismissRequest = viewModel::onDismissAdvancedFilter,
             availableCategories = availableCategories,
-            availablePaymentMethod = availablePaymentMethods,
+            availablePaymentMethods = availablePaymentMethods,
+            initialStartDate = uiState.startDate,
+            initialEndDate = uiState.endDate
         )
     }
 

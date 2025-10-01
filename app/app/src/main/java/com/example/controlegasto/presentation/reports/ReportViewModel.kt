@@ -98,6 +98,8 @@ class ReportViewModel(
             it.copy(
                 selectedCategories = filterState.selectedCategories,
                 selectedPaymentMethods = filterState.selectedPaymentMethod,
+                startDate = filterState.startDate,
+                endDate = filterState.endDate,
                 isAdvancedFilterDialogVisible = false
                 ) }
     }
