@@ -1,4 +1,4 @@
-package com.example.controlegasto.presentation.reports
+package com.example.controlegasto.presentation.reports.components
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement

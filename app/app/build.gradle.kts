@@ -63,21 +63,23 @@ dependencies {
 
     implementation(libs.androidx.lifecycle.viewmodel.compose)
 
-
+    implementation(libs.vico.compose.m3)
     implementation(libs.androidx.navigation.compose)
 
 
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
+    implementation(libs.androidx.slice.core)
     ksp(libs.androidx.room.compiler)
     androidTestImplementation(libs.androidx.room.testing)
-
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.ui.test.junit4)
+    implementation(libs.mpandroidchart)
+
 
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
