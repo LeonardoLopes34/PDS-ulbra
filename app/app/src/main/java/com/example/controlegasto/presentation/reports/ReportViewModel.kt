@@ -1,6 +1,7 @@
     package com.example.controlegasto.presentation.reports
 
     import androidx.compose.ui.graphics.Color
+    import androidx.compose.ui.text.intl.Locale
     import androidx.lifecycle.ViewModel
     import androidx.lifecycle.ViewModelProvider
     import androidx.lifecycle.viewModelScope
@@ -24,6 +25,7 @@
     import kotlinx.coroutines.flow.map
     import kotlinx.coroutines.flow.stateIn
     import kotlinx.coroutines.flow.update
+    import java.text.NumberFormat
     import java.time.LocalDate
     import java.time.ZoneId
 
@@ -44,7 +46,8 @@
     data class PieChartData(
         val categoryName: String,
         val totalValue: Float,
-        val color: Color
+        val color: Color,
+        val percentage: Float
     )
 
     class ReportViewModel(
@@ -61,11 +64,6 @@
         fun onDismissAdvancedFilter(){
             _uiState.update { it.copy(isAdvancedFilterDialogVisible = false) }
         }
-
-        val categories: StateFlow<List<Category>> = categoryRepository.getAllCategories()
-            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
-
-        val paymentMethods: StateFlow<List<PaymentMethod>> = MutableStateFlow(PaymentMethod.entries.toList()).asStateFlow()
 
         @OptIn(ExperimentalCoroutinesApi::class)
         val filteredExpenses: StateFlow<List<ExpenseWithCategory>> = uiState.flatMapLatest { state ->
@@ -100,14 +98,30 @@
             }
         }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
+        val categories: StateFlow<List<Category>> = categoryRepository.getAllCategories()
+            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+        val paymentMethods: StateFlow<List<PaymentMethod>> = MutableStateFlow(PaymentMethod.entries.toList()).asStateFlow()
+
+        val totalFilteredAmount: StateFlow<String> = filteredExpenses.map { expenseWithCategory ->
+            val total = expenseWithCategory.sumOf { it.expense.value.toDouble().toFloat() }
+            NumberFormat.getCurrencyInstance(java.util.Locale("pt", "BR")).format(total)
+        }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "R$ 0,00")
+
+
         val pieChartData: StateFlow<List<PieChartData>> = filteredExpenses.map{expenseWithCategory ->
+            val overallTotal = expenseWithCategory.sumOf { it.expense.value.toDouble().toFloat() }
+            if (overallTotal == 0f) return@map emptyList()
             expenseWithCategory
                 .groupBy { it.category}
                 .map{(category, expenses ) ->
+                    val categoryTotal = expenses.sumOf { it.expense.value.toDouble().toFloat() }
+                    val percentage = (categoryTotal / overallTotal) * 100f
                     PieChartData(
                         categoryName = category.name,
                         totalValue = expenses.sumOf {it.expense.value.toFloat() },
-                        color = Color(category.color.toULong())
+                        color = Color(category.color.toULong()),
+                        percentage = percentage
                     )
                 }
         }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())

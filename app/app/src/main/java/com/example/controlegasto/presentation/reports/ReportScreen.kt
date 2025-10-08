@@ -61,6 +61,7 @@ fun ReportScreen(
     val availableCategories by viewModel.categories.collectAsState()
     val availablePaymentMethods by viewModel.paymentMethods.collectAsState()
 
+    val totalAmountText by viewModel.totalFilteredAmount.collectAsState()
     val pieChartData by viewModel.pieChartData.collectAsState()
 
     if (uiState.isAdvancedFilterDialogVisible) {
@@ -116,30 +117,39 @@ fun ReportScreen(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(24.dp)
             ) {
-                Text(
-                    "Total do dia: R$00000000",
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.ExtraBold
-                )
+                Spacer(modifier = Modifier.height(24.dp))
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(250.dp)
-                        .padding(16.dp),
+                        .height(200.dp)
+                        .padding(horizontal = 16.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Box(modifier = Modifier.weight(0.8f)) {
-                        PieChart(data = pieChartData, modifier = Modifier.fillMaxSize())
+                    Box(
+                        modifier = Modifier.weight(0.6f),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        PieChart(
+                            data = pieChartData,
+                            modifier = Modifier.fillMaxSize()
+                        )
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Text("Total", style = MaterialTheme.typography.bodySmall)
+                            Text(
+                                text = totalAmountText,
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
                     }
 
                     Spacer(modifier = Modifier.width(16.dp))
-
-
                     ChartLegend(
                         data = pieChartData,
-                        modifier = Modifier.weight(0.2f)
+                        modifier = Modifier.weight(0.4f)
                     )
                 }
+                Spacer(modifier = Modifier.height(1.dp))
 
                 LazyRow(
                     modifier = Modifier.fillMaxWidth(),
