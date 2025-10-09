@@ -1,4 +1,4 @@
-package com.example.controlegasto.presentation.reports.components
+package com.example.controlegasto.presentation.components
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -112,7 +112,7 @@ fun AdvancedFilterDialog(
                 Text("Categorias", style = MaterialTheme.typography.titleSmall)
                 LazyColumn(
                     modifier = Modifier.heightIn(max = 120.dp)
-                ) {
+        ,        ) {
                     items(availableCategories) { category ->
                         SelectableRow(
                             text = category.name,

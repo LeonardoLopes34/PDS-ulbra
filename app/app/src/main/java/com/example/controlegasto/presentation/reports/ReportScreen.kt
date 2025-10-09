@@ -1,6 +1,5 @@
 package com.example.controlegasto.presentation.reports
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -17,7 +16,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
@@ -37,18 +35,17 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.controlegasto.presentation.cards.ExpenseCard
-import com.example.controlegasto.presentation.reports.components.AdvancedFilterDialog
-import com.example.controlegasto.presentation.reports.components.ChartLegend
-import com.example.controlegasto.presentation.reports.components.PieChart
+import com.example.controlegasto.presentation.components.AdvancedFilterDialog
+import com.example.controlegasto.presentation.components.AiPromptDialog
+import com.example.controlegasto.presentation.components.ChartLegend
+import com.example.controlegasto.presentation.components.PieChart
 import com.example.controlegasto.presentation.theme.ButtonColor
-import com.example.controlegasto.presentation.theme.LightBlue
 import com.example.controlegasto.presentation.theme.LightBlue2
+import com.example.controlegasto.presentation.theme.TopBar
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -75,6 +72,13 @@ fun ReportScreen(
         )
     }
 
+    if (uiState.isAIPromptDialogVisible) {
+        AiPromptDialog(
+            onDismissRequest = viewModel::onDismissAIPrompt,
+            onApplyClick = viewModel::onApplyAIPrompt
+        )
+    }
+
 
 
     Scaffold(
@@ -83,7 +87,7 @@ fun ReportScreen(
         topBar = {
             TopAppBar(
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = LightBlue,
+                    containerColor = TopBar,
                     titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
                 ),
                 title = { Text("Relatórios") },
@@ -100,7 +104,7 @@ fun ReportScreen(
         floatingActionButton = {
             FloatingActionButton(
                 containerColor = ButtonColor,
-                onClick = {/* TODO add expense button*/ },
+                onClick = viewModel::onOpenAIPrompt ,
                 modifier = Modifier.size(80.dp),
             ) {
                 Icon(

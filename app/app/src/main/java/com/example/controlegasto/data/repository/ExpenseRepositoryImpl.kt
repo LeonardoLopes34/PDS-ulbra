@@ -5,6 +5,7 @@ import com.example.controlegasto.domain.entities.Expense
 import com.example.controlegasto.domain.entities.PaymentMethod
 import kotlinx.coroutines.flow.Flow
 import java.time.LocalDate
+import java.time.ZoneId
 import kotlin.math.exp
 
 class ExpenseRepositoryImpl(private val expenseDao: ExpenseDao) : ExpenseRepository {
@@ -58,6 +59,11 @@ class ExpenseRepositoryImpl(private val expenseDao: ExpenseDao) : ExpenseReposit
         paymentMethods: List<PaymentMethod>
     ): Flow<List<Expense>> {
         return expenseDao.getExpensesByAllFilters(startDate, endDate, categoryIds, paymentMethods)
+    }
+
+    override fun getExpenseForDate(date: LocalDate): Flow<List<Expense>> {
+        val dateInMillis = date.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
+        return expenseDao.getExpensesForDate(dateInMillis)
     }
 
 

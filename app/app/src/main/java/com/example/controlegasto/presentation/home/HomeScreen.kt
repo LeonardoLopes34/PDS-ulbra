@@ -6,12 +6,14 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
@@ -43,11 +45,13 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.OutlinedButton
+import com.example.controlegasto.presentation.components.ChartLegend
+import com.example.controlegasto.presentation.components.PieChart
 import com.example.controlegasto.presentation.theme.ButtonColor
 import com.example.controlegasto.presentation.theme.ControleGastoTheme
-import com.example.controlegasto.presentation.theme.LightBlue
 import com.example.controlegasto.presentation.theme.LightBlue2
 import com.example.controlegasto.presentation.theme.TextColorTotal
+import com.example.controlegasto.presentation.theme.TopBar
 import java.math.BigDecimal
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -59,6 +63,8 @@ fun HomeScreen(
 
     val uiState by viewModel.uiState.collectAsState()
     val expensesWithCategory by viewModel.expensesWithCategory.collectAsState()
+    val totalAmountForToday by viewModel.totalAmountForToday.collectAsState()
+    val pieChartDataForToday by viewModel.pieChartDataForToday.collectAsState()
 
 
     if(uiState.isAddExpanseDialogVisible) {
@@ -90,10 +96,10 @@ fun HomeScreen(
         topBar = {
             CenterAlignedTopAppBar(
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = LightBlue,
+                    containerColor = TopBar,
                     titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
                 ),
-                title = { Text("Menu") }
+                title = { Text("Meu Bolso") }
             )
         },
         floatingActionButton = {
@@ -112,25 +118,49 @@ fun HomeScreen(
             Column(
                 modifier = Modifier
                     .padding(innerPadding)
-                    .fillMaxSize()
-                    .padding(16.dp),
+                    .fillMaxSize(),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(24.dp)
             ) {
-                Text(
-                    "Total do dia: R$ 00000", style = MaterialTheme.typography.titleLarge
-                )
-                Box(
+                Spacer(modifier = Modifier.height(24.dp))
+
+                Row(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(200.dp)
-                        .clip(CircleShape) // Define a forma como um círculo
-                        .background(MaterialTheme.colorScheme.secondaryContainer), // Aplica a cor de fundo
-                    contentAlignment = Alignment.Center
+                        .padding(horizontal = 16.dp),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text("Teste")
+                    Box(
+                        modifier = Modifier.weight(0.6f),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        PieChart(
+                            data = pieChartDataForToday,
+                            modifier = Modifier.fillMaxSize()
+                        )
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Text("Total", style = MaterialTheme.typography.bodySmall)
+                            Text(
+                                text = totalAmountForToday,
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                    }
+                    Spacer(modifier = Modifier.width(16.dp))
+                    ChartLegend(
+                        data = pieChartDataForToday,
+                        modifier = Modifier.weight(0.4f)
+                    )
                 }
-                LazyColumn(   //trocar essa row por uma lazyrow para evitar os cards de ficarem espremidos
+                Text(
+                    text = "Despesas de Hoje",
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)
+                )
+
+                LazyColumn(
                     modifier = Modifier
                         .fillMaxWidth(),
                     contentPadding = PaddingValues(horizontal = 16.dp),
@@ -147,17 +177,7 @@ fun HomeScreen(
                    }
                 }
                 Spacer(modifier = Modifier.height(15.dp))
-                Column(
-                    modifier = Modifier,
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Text(
-                        "Total: R$ 00000000",
-                        color = TextColorTotal,
-                        fontSize = 30.sp,
-                        style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold
-                    )
-                }
+
                 Spacer(modifier = Modifier.weight(1f))
             }
         }

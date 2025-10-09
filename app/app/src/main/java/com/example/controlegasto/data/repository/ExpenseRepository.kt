@@ -16,5 +16,5 @@ interface ExpenseRepository {
     fun getExpensesByCategoriesAndDate(startDate: Long, endDate: Long, categoryIds: List<Int>): Flow<List<Expense>>
     fun getExpensesByPaymentMethodsAndDate(startDate: Long, endDate: Long, paymentMethods: List<PaymentMethod>): Flow<List<Expense>>
     fun getExpensesByAllFilters(startDate: Long, endDate: Long, categoryIds: List<Int>, paymentMethods: List<PaymentMethod>): Flow<List<Expense>>
-
+    fun getExpenseForDate(date: LocalDate): Flow<List<Expense>>
 }

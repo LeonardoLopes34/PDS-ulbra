@@ -43,8 +43,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.controlegasto.presentation.theme.ControleGastoTheme
-import com.example.controlegasto.presentation.theme.LightBlue
 import com.example.controlegasto.presentation.theme.LightBlue2
+import com.example.controlegasto.presentation.theme.TopBar
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -84,7 +84,7 @@ fun ConfigurationScreen(
         topBar = {
             TopAppBar(
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = LightBlue,
+                    containerColor = TopBar,
                     titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
                 ),
                 title = {Text("Configurações")},

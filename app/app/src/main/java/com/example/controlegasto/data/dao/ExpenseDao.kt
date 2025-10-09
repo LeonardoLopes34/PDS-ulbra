@@ -42,4 +42,7 @@ interface ExpenseDao {
 
     @Query("SELECT * FROM expenses WHERE date BETWEEN :startDate AND :endDate AND categoryId IN (:categoryIds) AND paymentMethod IN (:paymentMethods) ORDER BY date DESC")
     fun getExpensesByAllFilters(startDate: Long, endDate: Long, categoryIds: List<Int>, paymentMethods: List<PaymentMethod>): Flow<List<Expense>>
+
+    @Query("SELECT * FROM expenses WHERE date = :date ORDER BY id DESC ")
+    fun getExpensesForDate(date:Long): Flow<List<Expense>>
 }

@@ -1,4 +1,4 @@
-package com.example.controlegasto.presentation.reports.components
+package com.example.controlegasto.presentation.components
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -53,7 +53,7 @@ fun PieChart(
             y = (size.height - diameter) / 2f
         )
 
-        val strokeWidth = diameter * 0.3f
+        val strokeWidth = diameter * 0.2f
 
         var startAngle = -90f
         data.forEachIndexed { index, slice ->

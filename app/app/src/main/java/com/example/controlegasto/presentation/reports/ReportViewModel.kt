@@ -1,7 +1,6 @@
     package com.example.controlegasto.presentation.reports
 
     import androidx.compose.ui.graphics.Color
-    import androidx.compose.ui.text.intl.Locale
     import androidx.lifecycle.ViewModel
     import androidx.lifecycle.ViewModelProvider
     import androidx.lifecycle.viewModelScope
@@ -12,7 +11,7 @@
     import com.example.controlegasto.domain.entities.Category
     import com.example.controlegasto.domain.entities.Expense
     import com.example.controlegasto.domain.entities.PaymentMethod
-    import com.example.controlegasto.presentation.reports.components.AdvancedFilterState
+    import com.example.controlegasto.presentation.components.AdvancedFilterState
     import com.patrykandpatrick.vico.core.extension.sumOf
     import kotlinx.coroutines.ExperimentalCoroutinesApi
     import kotlinx.coroutines.flow.Flow
@@ -35,7 +34,8 @@
         val activeFilter: DateFilterType = DateFilterType.LAST_7_DAYS,
         val selectedCategories: List<Category> = emptyList(),
         val selectedPaymentMethods: List<PaymentMethod> = emptyList(),
-        val isAdvancedFilterDialogVisible: Boolean = false
+        val isAdvancedFilterDialogVisible: Boolean = false,
+        val isAIPromptDialogVisible: Boolean = false
     )
 
     data class ExpenseWithCategory(
@@ -64,6 +64,18 @@
         fun onDismissAdvancedFilter(){
             _uiState.update { it.copy(isAdvancedFilterDialogVisible = false) }
         }
+
+        fun onOpenAIPrompt() {
+            _uiState.update { it.copy(isAIPromptDialogVisible = true) }
+        }
+        fun onDismissAIPrompt() {
+            _uiState.update { it.copy(isAIPromptDialogVisible = false) }
+        }
+        fun onApplyAIPrompt(prompt: String) {
+            /*TODO function to call AI Agent */
+            onDismissAIPrompt()
+        }
+
 
         @OptIn(ExperimentalCoroutinesApi::class)
         val filteredExpenses: StateFlow<List<ExpenseWithCategory>> = uiState.flatMapLatest { state ->
