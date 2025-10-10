@@ -11,6 +11,7 @@ import com.example.controlegasto.domain.entities.Expense
 import com.example.controlegasto.domain.entities.PaymentMethod
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.isActive
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDate
@@ -110,6 +111,27 @@ class AddExpanseViewModel(private val categoryRepository: CategoryRepository): V
         _uiState.update { it.copy(errorMessage = null) }
         onSaveSuccess(newExpense)
 
+    }
+
+    fun loadExpense(expense: Expense, category: Category) {
+        _uiState.update {
+            it.copy(
+                expanseValue = expense.value.toPlainString(),
+                expanseSelectedCategory = category,
+                expanseSelectedPaymentMethod = expense.paymentMethod,
+                expanseDescription = expense.description,
+                expanseSelectedDate = expense.date
+            )
+        }
+    }
+
+    fun resetState() {
+        _uiState.update {
+            AddExpanseUiState(
+                categoryList = it.categoryList,
+                paymentMethodList = it.paymentMethodList
+            )
+        }
     }
     // get category and payment methods from repository
 }

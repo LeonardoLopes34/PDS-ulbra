@@ -33,12 +33,7 @@ fun PieChart(
     modifier: Modifier = Modifier
 ) {
     if (data.isEmpty()) {
-        Box(
-            modifier = modifier,
-            contentAlignment = Alignment.Center
-        ) {
-            Text("Sem dados para exibir")
-        }
+
         return
     }
 

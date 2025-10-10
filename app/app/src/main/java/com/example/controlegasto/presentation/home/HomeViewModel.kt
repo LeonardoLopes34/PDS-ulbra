@@ -29,7 +29,7 @@ import kotlin.math.exp
 
 data class HomeUiState(
     val isAddExpanseDialogVisible: Boolean = false,
-    val expenseToEdit: Expense? = null,
+    val expenseToEdit: ExpenseWithCategory? = null,
     val expenseForDeletion: Expense? = null
 )
 
@@ -48,26 +48,19 @@ class HomeViewModel(
         _uiState.update { it.copy(isAddExpanseDialogVisible = false, expenseToEdit = null) }
     }
 
-    fun onEditExpense(expense: Expense) {
+    fun onEditExpense(expense: ExpenseWithCategory) {
         _uiState.update { it.copy(isAddExpanseDialogVisible = true, expenseToEdit = expense) }
     }
 
     fun onSaveExpanse(expense: Expense) {
         viewModelScope.launch {
-            val expenseToEdit = _uiState.value.expenseToEdit
-            if (expenseToEdit != null) {
-                val updatedExpense = expenseToEdit.copy(
-                    value = expense.value,
-                    description = expense.description,
-                    categoryId = expense.categoryId,
-                    paymentMethod = expense.paymentMethod,
-                    date = expense.date
-                )
+            val itemToEdit = _uiState.value.expenseToEdit
+            if (itemToEdit != null) {
+                val updatedExpense = expense.copy(id = itemToEdit.expense.id)
                 expenseRepository.updateExpense(updatedExpense)
             } else {
                 expenseRepository.addExpense(expense)
             }
-
         }
     }
 

@@ -76,7 +76,9 @@ fun HomeScreen(
                 onSaveClick = { expense ->
                     viewModel.onSaveExpanse(expense)
                     viewModel.onDialogDismiss()
-                }
+                },
+                expenseToEdit = uiState.expenseToEdit?.expense,
+                categoryToEdit = uiState.expenseToEdit?.category
             )
         }
     }
@@ -170,7 +172,7 @@ fun HomeScreen(
                        ExpenseCard(
                            item = item,
                            expenseNumeration = index + 1,
-                           onEditClick = { viewModel.onEditExpense(item.expense) },
+                           onEditClick = { viewModel.onEditExpense(item) },
                            onDeleteClick = { viewModel.requestDeleteConfirmation(item.expense) },
                            modifier = Modifier
                        )

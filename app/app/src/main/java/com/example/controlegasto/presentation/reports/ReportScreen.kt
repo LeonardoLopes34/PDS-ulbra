@@ -26,6 +26,7 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -38,11 +39,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.controlegasto.presentation.add_expense.AddExpenseSheet
 import com.example.controlegasto.presentation.cards.ExpenseCard
 import com.example.controlegasto.presentation.components.AdvancedFilterDialog
 import com.example.controlegasto.presentation.components.AiPromptDialog
 import com.example.controlegasto.presentation.components.ChartLegend
 import com.example.controlegasto.presentation.components.PieChart
+import com.example.controlegasto.presentation.home.DeleteExpenseConfirmationDialog
 import com.example.controlegasto.presentation.theme.ButtonColor
 import com.example.controlegasto.presentation.theme.LightBlue2
 import com.example.controlegasto.presentation.theme.TopBar
@@ -72,6 +75,7 @@ fun ReportScreen(
         )
     }
 
+    // Aiprompt
     if (uiState.isAIPromptDialogVisible) {
         AiPromptDialog(
             onDismissRequest = viewModel::onDismissAIPrompt,
@@ -79,6 +83,33 @@ fun ReportScreen(
         )
     }
 
+    // add expense visibility
+    if (uiState.isAddExpenseDialogVisible) {
+        ModalBottomSheet(onDismissRequest = viewModel::onDialogDismiss) {
+            AddExpenseSheet(
+                onDismissRequest = viewModel::onDialogDismiss,
+                onSaveClick = { expense ->
+                    uiState.expenseToEdit?.let {
+                        viewModel.onUpdateExpense(expense.copy(id = it.expense.id))
+                    }
+                    viewModel.onDialogDismiss()
+                },
+                expenseToEdit = uiState.expenseToEdit?.expense,
+                categoryToEdit = uiState.expenseToEdit?.category
+            )
+        }
+    }
+
+
+    // delete expense confirmation
+    val expenseToDelete = uiState.expenseForDeletion
+    if (expenseToDelete != null) {
+        DeleteExpenseConfirmationDialog(
+            expenseValue = expenseToDelete.value,
+            onConfirm = viewModel::confirmDelete,
+            onDismiss = viewModel::cancelDelete
+        )
+    }
 
 
     Scaffold(
@@ -104,7 +135,8 @@ fun ReportScreen(
         floatingActionButton = {
             FloatingActionButton(
                 containerColor = ButtonColor,
-                onClick = viewModel::onOpenAIPrompt ,
+
+                onClick = viewModel::onOpenAIPrompt,
                 modifier = Modifier.size(80.dp),
             ) {
                 Icon(
@@ -119,7 +151,7 @@ fun ReportScreen(
                     .padding(innerPadding)
                     .fillMaxSize(),
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(24.dp)
+                verticalArrangement = Arrangement.spacedBy(23.dp)
             ) {
                 Spacer(modifier = Modifier.height(24.dp))
                 Row(
@@ -164,7 +196,7 @@ fun ReportScreen(
                         FilterChip(
                             selected = (uiState.activeFilter == filterType),
                             onClick = {
-                                if(filterType == DateFilterType.CUSTOM) {
+                                if (filterType == DateFilterType.CUSTOM) {
                                     viewModel.onOpenAdvancedFilter()
                                 } else {
                                     viewModel.onFilterSelected(filterType)
@@ -184,12 +216,12 @@ fun ReportScreen(
                     contentPadding = PaddingValues(16.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    itemsIndexed(expenses) {index, item ->
+                    itemsIndexed(expenses) { index, item ->
                         ExpenseCard(
                             item = item,
                             expenseNumeration = index + 1,
-                            onEditClick = { /* TODO: viewModel.onEditExpense(item.expense) */ },
-                            onDeleteClick = { /* TODO: viewModel.onDeleteExpense(item.expense) */ },
+                            onEditClick = { viewModel.onEditExpenseClicked(item) },
+                            onDeleteClick = { viewModel.onRequestDeleteConfirmation(item.expense) },
                             modifier = Modifier
                         )
                     }

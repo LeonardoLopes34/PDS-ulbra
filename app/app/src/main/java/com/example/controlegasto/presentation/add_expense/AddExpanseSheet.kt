@@ -35,6 +35,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -48,6 +49,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.controlegasto.R
+import com.example.controlegasto.domain.entities.Category
 import com.example.controlegasto.domain.entities.Expense
 import java.time.Instant
 import java.time.ZoneId
@@ -58,9 +60,19 @@ import java.time.format.DateTimeFormatter
 fun AddExpenseSheet(
     onDismissRequest: () -> Unit,
     onSaveClick: (Expense) -> Unit,
+    expenseToEdit: Expense? = null,
+    categoryToEdit: Category? = null,
     viewModel: AddExpanseViewModel = viewModel(factory = AddExpenseViewModelFactory)
 ) {
     val uiState by viewModel.uiState.collectAsState()
+
+    LaunchedEffect(expenseToEdit, categoryToEdit) {
+        if (expenseToEdit != null && categoryToEdit != null) {
+            viewModel.loadExpense(expenseToEdit, categoryToEdit)
+        } else {
+            viewModel.resetState()
+        }
+    }
 
     // calendar for picked date
     if (uiState.isDatePickerSelected) {
@@ -137,7 +149,7 @@ fun AddExpenseSheet(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
-                    text = "Adicionar despesa",
+                    text = if(expenseToEdit == null)"Adicionar despesa" else "Editar Despesa",
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Bold
                 )

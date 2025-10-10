@@ -5,6 +5,7 @@
     import androidx.lifecycle.ViewModelProvider
     import androidx.lifecycle.viewModelScope
     import androidx.lifecycle.viewmodel.CreationExtras
+    import androidx.lifecycle.viewmodel.compose.viewModel
     import com.example.controlegasto.ExpenseControlApplication
     import com.example.controlegasto.data.repository.CategoryRepository
     import com.example.controlegasto.data.repository.ExpenseRepository
@@ -24,9 +25,12 @@
     import kotlinx.coroutines.flow.map
     import kotlinx.coroutines.flow.stateIn
     import kotlinx.coroutines.flow.update
+    import kotlinx.coroutines.launch
     import java.text.NumberFormat
     import java.time.LocalDate
     import java.time.ZoneId
+    import kotlin.math.exp
+    import kotlin.math.floor
 
     data class ReportUiState(
         val startDate: LocalDate = LocalDate.now().minusDays(7),
@@ -35,7 +39,10 @@
         val selectedCategories: List<Category> = emptyList(),
         val selectedPaymentMethods: List<PaymentMethod> = emptyList(),
         val isAdvancedFilterDialogVisible: Boolean = false,
-        val isAIPromptDialogVisible: Boolean = false
+        val isAIPromptDialogVisible: Boolean = false,
+        val isAddExpenseDialogVisible: Boolean = false,
+        val expenseToEdit: ExpenseWithCategory? = null,
+        val expenseForDeletion: Expense? = null
     )
 
     data class ExpenseWithCategory(
@@ -75,7 +82,33 @@
             /*TODO function to call AI Agent */
             onDismissAIPrompt()
         }
-
+        fun onEditExpenseClicked(expense: ExpenseWithCategory) {
+            _uiState.update { it.copy(isAddExpenseDialogVisible = true, expenseToEdit = expense) }
+        }
+        fun onDialogDismiss() {
+            _uiState.update { it.copy(isAddExpenseDialogVisible = false, expenseToEdit = null) }
+        }
+        fun onRequestDeleteConfirmation(expense: Expense) {
+            _uiState.update { it.copy(expenseForDeletion = expense) }
+        }
+        fun cancelDelete() {
+            _uiState.update { it.copy(expenseForDeletion = null) }
+        }
+        fun confirmDelete() {
+            val expenseToDelete = _uiState.value.expenseForDeletion
+            if(expenseToDelete != null) {
+                viewModelScope.launch {
+                    expenseRepository.deleteExpense(expenseToDelete)
+                    _uiState.update { it.copy(expenseForDeletion = null)
+                    }
+                }
+            }
+        }
+        fun onUpdateExpense(expense: Expense) {
+            viewModelScope.launch {
+                    expenseRepository.updateExpense(expense)
+            }
+        }
 
         @OptIn(ExperimentalCoroutinesApi::class)
         val filteredExpenses: StateFlow<List<ExpenseWithCategory>> = uiState.flatMapLatest { state ->
@@ -116,7 +149,7 @@
         val paymentMethods: StateFlow<List<PaymentMethod>> = MutableStateFlow(PaymentMethod.entries.toList()).asStateFlow()
 
         val totalFilteredAmount: StateFlow<String> = filteredExpenses.map { expenseWithCategory ->
-            val total = expenseWithCategory.sumOf { it.expense.value.toDouble().toFloat() }
+            val total = expenseWithCategory.sumOf { it.expense.value.toDouble().toFloat()}
             NumberFormat.getCurrencyInstance(java.util.Locale("pt", "BR")).format(total)
         }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "R$ 0,00")
 
