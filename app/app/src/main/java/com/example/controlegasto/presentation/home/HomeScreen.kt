@@ -1,7 +1,12 @@
 package com.example.controlegasto.presentation.home
 
-import android.app.AlertDialog
-import androidx.compose.foundation.background
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -16,7 +21,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -33,14 +37,12 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.controlegasto.presentation.add_expense.AddExpenseSheet
-import com.example.controlegasto.presentation.cards.ExpenseCard
+import com.example.controlegasto.presentation.components.cards.ExpenseCard
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -50,11 +52,10 @@ import com.example.controlegasto.presentation.components.PieChart
 import com.example.controlegasto.presentation.theme.ButtonColor
 import com.example.controlegasto.presentation.theme.ControleGastoTheme
 import com.example.controlegasto.presentation.theme.LightBlue2
-import com.example.controlegasto.presentation.theme.TextColorTotal
 import com.example.controlegasto.presentation.theme.TopBar
 import java.math.BigDecimal
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun HomeScreen(
     modifier: Modifier = Modifier,
@@ -67,7 +68,7 @@ fun HomeScreen(
     val pieChartDataForToday by viewModel.pieChartDataForToday.collectAsState()
 
 
-    if(uiState.isAddExpanseDialogVisible) {
+    if (uiState.isAddExpanseDialogVisible) {
         ModalBottomSheet(
             onDismissRequest = viewModel::onDialogDismiss,
         ) {
@@ -159,24 +160,35 @@ fun HomeScreen(
                 Text(
                     text = "Despesas de Hoje",
                     style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp)
                 )
 
                 LazyColumn(
                     modifier = Modifier
                         .fillMaxWidth(),
-                    contentPadding = PaddingValues(horizontal = 16.dp),
+                    contentPadding = PaddingValues(
+                        start = 16.dp,
+                        end = 16.dp,
+                        bottom = 100.dp
+                    ),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                   itemsIndexed(expensesWithCategory) {index, item ->
-                       ExpenseCard(
-                           item = item,
-                           expenseNumeration = index + 1,
-                           onEditClick = { viewModel.onEditExpense(item) },
-                           onDeleteClick = { viewModel.requestDeleteConfirmation(item.expense) },
-                           modifier = Modifier
-                       )
-                   }
+                    itemsIndexed(
+                        items = expensesWithCategory,
+                        key = { _, item -> item.expense.id }
+                    ) {_,  item ->
+                        ExpenseCard(
+                            item = item,
+                            onEditClick = { viewModel.onEditExpense(item) },
+                            onDeleteClick = { viewModel.requestDeleteConfirmation(item.expense) },
+                            modifier = Modifier.animateItemPlacement(
+                                animationSpec = tween(
+                                    durationMillis = 800 // testeeee
+                                )
+                        ))
+                    }
                 }
                 Spacer(modifier = Modifier.height(15.dp))
 
@@ -194,7 +206,7 @@ fun DeleteExpenseConfirmationDialog(
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
-        title= { Text("Confirmar Exclusão")},
+        title = { Text("Confirmar Exclusão") },
         text = {
             Text("Tem a certeze de que deseja apagar o gasto com o valor \"$expenseValue\"? Esta ação não pode ser desfeita")
         },

@@ -30,7 +30,8 @@ import kotlin.math.exp
 data class HomeUiState(
     val isAddExpanseDialogVisible: Boolean = false,
     val expenseToEdit: ExpenseWithCategory? = null,
-    val expenseForDeletion: Expense? = null
+    val expenseForDeletion: Expense? = null,
+    val selecteExpenseId: Int? = null
 )
 
 class HomeViewModel(
@@ -82,6 +83,13 @@ class HomeViewModel(
         }
     }
 
+    fun onExpenseSelected(expenseId: Int) {
+        _uiState.update {
+            val newSelectedId = if(it.selecteExpenseId == expenseId) null else expenseId
+            it.copy(selecteExpenseId = newSelectedId)
+        }
+    }
+
 
     val expensesWithCategory: StateFlow<List<ExpenseWithCategory>> =
         expenseRepository.getExpenseForDate(LocalDate.now())
@@ -115,6 +123,8 @@ class HomeViewModel(
             )
         }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+
 }
 
 

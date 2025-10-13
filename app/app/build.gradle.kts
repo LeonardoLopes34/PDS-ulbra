@@ -1,12 +1,12 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
-    alias(libs.plugins.ksp) // O KSP é aplicado aqui
+    alias(libs.plugins.ksp)
 }
 
 android {
     namespace = "com.example.controlegasto"
-    compileSdk = 34 // Use uma versão estável do SDK, como 34
+    compileSdk = 34
 
     defaultConfig {
         applicationId = "com.example.controlegasto"

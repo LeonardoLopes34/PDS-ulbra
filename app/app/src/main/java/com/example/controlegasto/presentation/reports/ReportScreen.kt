@@ -39,8 +39,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import com.example.controlegasto.presentation.add_expense.AddExpenseSheet
-import com.example.controlegasto.presentation.cards.ExpenseCard
+import com.example.controlegasto.presentation.components.cards.ExpenseCard
 import com.example.controlegasto.presentation.components.AdvancedFilterDialog
 import com.example.controlegasto.presentation.components.AiPromptDialog
 import com.example.controlegasto.presentation.components.ChartLegend
@@ -53,6 +54,7 @@ import com.example.controlegasto.presentation.theme.TopBar
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ReportScreen(
+    navController: NavController,
     modifier: Modifier = Modifier,
     viewModel: ReportViewModel = viewModel(factory = ReportViewModel.ReportViewModelFactory)
 ) {
@@ -123,7 +125,7 @@ fun ReportScreen(
                 ),
                 title = { Text("Relatórios") },
                 navigationIcon = {
-                    IconButton(onClick = {/*TODO button to return to home screen*/ }) {
+                    IconButton(onClick = {navController.navigateUp() }) {
                         Icon(
                             imageVector = Icons.Default.ArrowBack,
                             contentDescription = "Icone de voltar"
@@ -213,16 +215,19 @@ fun ReportScreen(
                 }
                 LazyColumn(
                     modifier = Modifier.weight(1f),
-                    contentPadding = PaddingValues(16.dp),
+                    contentPadding = PaddingValues(
+                        start = 16.dp,
+                        end = 16.dp,
+                        bottom = 100.dp
+                    ),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     itemsIndexed(expenses) { index, item ->
                         ExpenseCard(
                             item = item,
-                            expenseNumeration = index + 1,
                             onEditClick = { viewModel.onEditExpenseClicked(item) },
                             onDeleteClick = { viewModel.onRequestDeleteConfirmation(item.expense) },
-                            modifier = Modifier
+                            modifier = Modifier,
                         )
                     }
                 }

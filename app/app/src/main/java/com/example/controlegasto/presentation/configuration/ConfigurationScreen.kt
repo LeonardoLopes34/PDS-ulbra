@@ -42,6 +42,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import com.example.controlegasto.presentation.theme.ControleGastoTheme
 import com.example.controlegasto.presentation.theme.LightBlue2
 import com.example.controlegasto.presentation.theme.TopBar
@@ -49,6 +51,7 @@ import com.example.controlegasto.presentation.theme.TopBar
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ConfigurationScreen(
+    navController: NavController,
     modifier: Modifier = Modifier,
     viewModel: ConfigurationViewModel = viewModel(factory = ConfigurationViewModelFactory)
 ) {
@@ -89,7 +92,7 @@ fun ConfigurationScreen(
                 ),
                 title = {Text("Configurações")},
                 navigationIcon = {
-                    IconButton(onClick = {/* TODO button to go back to mainscreen*/}) {
+                    IconButton(onClick = {navController.navigateUp()}) {
                         Icon(
                             imageVector = Icons.Default.ArrowBack,
                             contentDescription = "Icone de voltar"
@@ -114,11 +117,10 @@ fun ConfigurationScreen(
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.padding(top = 50.dp, start = 30.dp)
                 )
-                // lazycolumn para exibir todas as categorias com um botao para excluir
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(70.dp)
+                        .height(75.dp)
                         .drawBehind {
                             val strokeWidth = Stroke.DefaultMiter
                             val pathEffect = PathEffect.dashPathEffect(floatArrayOf(30f, 20f), 0f)
@@ -157,7 +159,6 @@ fun ConfigurationScreen(
                     modifier  = Modifier
                         .fillMaxWidth()
                         .weight(1f),
-                    contentPadding = PaddingValues(horizontal = 16.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     items(categories) { category ->
@@ -210,6 +211,6 @@ fun DeleteCategoryConfirmationDialog(
 @Composable
 fun ConfigurationScreenPreview(modifier: Modifier = Modifier) {
     ControleGastoTheme {
-        ConfigurationScreen()
+        ConfigurationScreen(navController = rememberNavController())
     }
 }

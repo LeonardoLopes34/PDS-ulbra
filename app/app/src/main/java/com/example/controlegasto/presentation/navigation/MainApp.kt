@@ -68,8 +68,8 @@ fun MainApp() {
             modifier = Modifier.padding(innerPadding)
         ) {
             composable(Screen.Home.route) { HomeScreen() }
-            composable(Screen.Report.route) { ReportScreen() }
-            composable(Screen.Configuration.route) { ConfigurationScreen() }
+            composable(Screen.Report.route) { ReportScreen(navController = navController) }
+            composable(Screen.Configuration.route) { ConfigurationScreen(navController = navController) }
         }
     }
 }
