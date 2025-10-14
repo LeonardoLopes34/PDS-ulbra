@@ -185,7 +185,7 @@ fun HomeScreen(
                             onDeleteClick = { viewModel.requestDeleteConfirmation(item.expense) },
                             modifier = Modifier.animateItemPlacement(
                                 animationSpec = tween(
-                                    durationMillis = 800 // testeeee
+                                    durationMillis = 600
                                 )
                         ))
                     }

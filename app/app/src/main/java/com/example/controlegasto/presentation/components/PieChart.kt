@@ -25,6 +25,7 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.unit.dp
 import com.example.controlegasto.presentation.reports.PieChartData
+import java.text.NumberFormat
 import java.util.Locale
 
 @Composable
@@ -72,6 +73,8 @@ fun ChartLegend(
     data: List<PieChartData>,
     modifier: Modifier = Modifier
 ) {
+
+    val currencyFormatter = remember { NumberFormat.getCurrencyInstance(Locale("pt", "BR")) }
     LazyColumn(
         modifier = modifier,
         verticalArrangement = Arrangement.Center
@@ -88,10 +91,10 @@ fun ChartLegend(
                         .background(item.color)
                 )
                 Spacer(modifier = Modifier.width(8.dp))
-                val legendText = "${item.categoryName} (${String.format(Locale.getDefault(), "%.1f", item.percentage)}%)"
+                val legendText = "${item.categoryName} (${String.format(Locale.getDefault(), "%.1f", item.percentage)}%) ${currencyFormatter.format(item.totalValue)}"
                 Text(
                     text = legendText,
-                    style = MaterialTheme.typography.bodySmall
+                    style = MaterialTheme.typography.labelSmall
                 )
             }
         }

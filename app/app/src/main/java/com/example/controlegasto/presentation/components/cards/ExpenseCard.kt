@@ -21,10 +21,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.controlegasto.R
 import com.example.controlegasto.domain.entities.Category
 import com.example.controlegasto.domain.entities.Expense
 import com.example.controlegasto.domain.entities.PaymentMethod
@@ -73,7 +75,7 @@ fun ExpenseCard(
                     onClick = {/* TODO */ },
                     label = { Text(item.category.name, fontWeight = FontWeight.Bold) },
                     colors = AssistChipDefaults.assistChipColors(
-                        containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.2f), /*TODO cor teste susbtiuir pela cor da categoria depois */
+                        containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.2f),
                         labelColor = Color.White
                     )
                 )
@@ -85,6 +87,24 @@ fun ExpenseCard(
                     style = MaterialTheme.typography.labelMedium
                 )
             }
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                Icon(
+                    painter = painterResource(id = item.expense.paymentMethod?.iconResId ?:  R.drawable.outline_wallet_24),
+                    contentDescription = item.expense.paymentMethod?.displayName,
+                    modifier = Modifier.size(16.dp),
+                    tint = Color.White.copy(alpha = 0.7f)
+                )
+                Text(
+                    text = item.expense.paymentMethod?.displayName ?: "N/D" ,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = Color.White.copy(alpha = 0.7f)
+                )
+            }
+            // edit or delete
+
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.End

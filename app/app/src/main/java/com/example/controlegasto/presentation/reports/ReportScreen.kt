@@ -1,5 +1,12 @@
 package com.example.controlegasto.presentation.reports
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.SizeTransform
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -51,7 +58,7 @@ import com.example.controlegasto.presentation.theme.ButtonColor
 import com.example.controlegasto.presentation.theme.LightBlue2
 import com.example.controlegasto.presentation.theme.TopBar
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun ReportScreen(
     navController: NavController,
@@ -125,7 +132,7 @@ fun ReportScreen(
                 ),
                 title = { Text("Relatórios") },
                 navigationIcon = {
-                    IconButton(onClick = {navController.navigateUp() }) {
+                    IconButton(onClick = { navController.navigateUp() }) {
                         Icon(
                             imageVector = Icons.Default.ArrowBack,
                             contentDescription = "Icone de voltar"
@@ -167,17 +174,28 @@ fun ReportScreen(
                         modifier = Modifier.weight(0.6f),
                         contentAlignment = Alignment.Center
                     ) {
+
                         PieChart(
                             data = pieChartData,
                             modifier = Modifier.fillMaxSize()
                         )
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text("Total", style = MaterialTheme.typography.bodySmall)
-                            Text(
-                                text = totalAmountText,
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.Bold
-                            )
+                            Text("Total")
+                            AnimatedContent(
+                                targetState = totalAmountText,
+                                transitionSpec = {
+                                    fadeIn(animationSpec = tween(220, delayMillis = 90)) togetherWith
+                                            fadeOut(animationSpec = tween(90)) using
+                                            SizeTransform(clip = false)
+                                },
+                                label = "Animated Total Amount"
+                            ) { targetText ->
+                                Text(
+                                    text = targetText,
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
                         }
                     }
 
@@ -222,12 +240,19 @@ fun ReportScreen(
                     ),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    itemsIndexed(expenses) { index, item ->
+                    itemsIndexed(
+                        items = expenses,
+                        key = { _, item -> item.expense.id }
+                    ) { index, item ->
                         ExpenseCard(
                             item = item,
                             onEditClick = { viewModel.onEditExpenseClicked(item) },
                             onDeleteClick = { viewModel.onRequestDeleteConfirmation(item.expense) },
-                            modifier = Modifier,
+                            modifier = Modifier.animateItemPlacement(
+                                animationSpec = tween(
+                                    durationMillis = 600
+                                )
+                            )
                         )
                     }
                 }
