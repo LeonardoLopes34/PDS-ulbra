@@ -13,6 +13,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -122,13 +124,13 @@ fun ReportScreen(
 
 
     Scaffold(
-        containerColor = LightBlue2,
+        containerColor = MaterialTheme.colorScheme.background,
         modifier = Modifier,
         topBar = {
             TopAppBar(
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = TopBar,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    titleContentColor = MaterialTheme.colorScheme.onPrimary
                 ),
                 title = { Text("Relatórios") },
                 navigationIcon = {
@@ -143,8 +145,8 @@ fun ReportScreen(
         },
         floatingActionButton = {
             FloatingActionButton(
-                containerColor = ButtonColor,
-
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.onPrimary,
                 onClick = viewModel::onOpenAIPrompt,
                 modifier = Modifier.size(80.dp),
             ) {
@@ -163,21 +165,25 @@ fun ReportScreen(
                 verticalArrangement = Arrangement.spacedBy(23.dp)
             ) {
                 Spacer(modifier = Modifier.height(24.dp))
+
+                // ring graph
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(200.dp)
                         .padding(horizontal = 16.dp),
-                    verticalAlignment = Alignment.CenterVertically
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Box(
-                        modifier = Modifier.weight(0.6f),
+                        modifier = Modifier
+                            .fillMaxHeight()
+                            .aspectRatio(1f),
                         contentAlignment = Alignment.Center
                     ) {
-
                         PieChart(
                             data = pieChartData,
-                            modifier = Modifier.fillMaxSize()
+                            modifier = Modifier.fillMaxSize().padding(start = 10.dp)
                         )
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
                             Text("Total")
@@ -198,11 +204,10 @@ fun ReportScreen(
                             }
                         }
                     }
-
                     Spacer(modifier = Modifier.width(16.dp))
                     ChartLegend(
                         data = pieChartData,
-                        modifier = Modifier.weight(0.4f)
+                        modifier = Modifier.padding(start = 16.dp)
                     )
                 }
                 Spacer(modifier = Modifier.height(1.dp))

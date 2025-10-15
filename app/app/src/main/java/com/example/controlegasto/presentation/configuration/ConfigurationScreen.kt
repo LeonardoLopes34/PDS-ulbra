@@ -57,9 +57,7 @@ fun ConfigurationScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val categories by viewModel.categoryList.collectAsState()
-
-
-    val borderColor = MaterialTheme.colorScheme.surfaceTint
+    val borderColor = MaterialTheme.colorScheme.outline
 
     if(uiState.isAddCategoryDialogVisible) {
         CategoryAddDialog(
@@ -82,13 +80,13 @@ fun ConfigurationScreen(
     }
 
     Scaffold(
-        containerColor = LightBlue2,
+        containerColor = MaterialTheme.colorScheme.background,
         modifier = Modifier,
         topBar = {
             TopAppBar(
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = TopBar,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    titleContentColor = MaterialTheme.colorScheme.onPrimary
                 ),
                 title = {Text("Configurações")},
                 navigationIcon = {
@@ -148,10 +146,12 @@ fun ConfigurationScreen(
                     ) {
                         Icon(
                             imageVector = Icons.Default.Add,
-                            contentDescription = "Icone para adicionar Categoria"
+                            contentDescription = "Icone para adicionar Categoria",
+                            tint = MaterialTheme.colorScheme.onSurface
                         )
                         Text(
-                            "Adicionar Categoria"
+                            "Adicionar Categoria",
+                            color = MaterialTheme.colorScheme.onSurface
                         )
                     }
                 }

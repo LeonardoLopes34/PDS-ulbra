@@ -13,6 +13,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -94,13 +96,13 @@ fun HomeScreen(
     }
 
     Scaffold(
-        containerColor = LightBlue2,
+        containerColor = MaterialTheme.colorScheme.background,
         modifier = modifier,
         topBar = {
             CenterAlignedTopAppBar(
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = TopBar,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    titleContentColor = MaterialTheme.colorScheme.onPrimary
                 ),
                 title = { Text("Meu Bolso") }
             )
@@ -108,7 +110,8 @@ fun HomeScreen(
         floatingActionButton = {
             FloatingActionButton(
                 onClick = viewModel::onAddExpanseClicked,
-                containerColor = ButtonColor,
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.onPrimary,
                 modifier = Modifier.size(80.dp),
             ) {
                 Icon(
@@ -127,23 +130,27 @@ fun HomeScreen(
             ) {
                 Spacer(modifier = Modifier.height(24.dp))
 
+                // ring graph
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(200.dp)
                         .padding(horizontal = 16.dp),
-                    verticalAlignment = Alignment.CenterVertically
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Box(
-                        modifier = Modifier.weight(0.6f),
+                        modifier = Modifier
+                            .fillMaxHeight()
+                            .aspectRatio(1f),
                         contentAlignment = Alignment.Center
                     ) {
                         PieChart(
                             data = pieChartDataForToday,
-                            modifier = Modifier.fillMaxSize()
+                            modifier = Modifier.fillMaxSize().padding(start = 10.dp)
                         )
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text("Total", style = MaterialTheme.typography.bodySmall)
+                            Text("Total")
                             Text(
                                 text = totalAmountForToday,
                                 style = MaterialTheme.typography.titleMedium,
@@ -154,7 +161,7 @@ fun HomeScreen(
                     Spacer(modifier = Modifier.width(16.dp))
                     ChartLegend(
                         data = pieChartDataForToday,
-                        modifier = Modifier.weight(0.4f)
+                        modifier = Modifier.padding(start = 16.dp)
                     )
                 }
                 Text(

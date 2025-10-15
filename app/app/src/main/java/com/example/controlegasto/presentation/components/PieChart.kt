@@ -34,7 +34,6 @@ fun PieChart(
     modifier: Modifier = Modifier
 ) {
     if (data.isEmpty()) {
-
         return
     }
 
@@ -49,7 +48,7 @@ fun PieChart(
             y = (size.height - diameter) / 2f
         )
 
-        val strokeWidth = diameter * 0.2f
+        val strokeWidth = diameter * 0.15f
 
         var startAngle = -90f
         data.forEachIndexed { index, slice ->
@@ -89,6 +88,7 @@ fun ChartLegend(
                         .size(14.dp)
                         .clip(CircleShape)
                         .background(item.color)
+                        .padding(start = 8.dp)
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 val legendText = "${item.categoryName} (${String.format(Locale.getDefault(), "%.1f", item.percentage)}%) ${currencyFormatter.format(item.totalValue)}"

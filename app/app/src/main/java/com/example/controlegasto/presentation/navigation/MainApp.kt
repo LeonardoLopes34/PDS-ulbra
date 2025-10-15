@@ -7,6 +7,7 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -56,7 +57,7 @@ fun MainApp() {
                             }
                         },
                         icon = { Icon(imageVector = item.second, contentDescription = item.first) },
-                        label = { Text(text = item.first) }
+                        label = { Text(text = item.first, color = MaterialTheme.colorScheme.primary) }
                     )
                 }
             }
