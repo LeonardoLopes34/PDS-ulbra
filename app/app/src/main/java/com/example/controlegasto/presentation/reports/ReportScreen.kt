@@ -29,6 +29,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Done
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FloatingActionButton
@@ -45,6 +46,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -65,9 +67,10 @@ import com.example.controlegasto.presentation.theme.TopBar
 fun ReportScreen(
     navController: NavController,
     modifier: Modifier = Modifier,
-    viewModel: ReportViewModel = viewModel(factory = ReportViewModel.ReportViewModelFactory)
+    viewModel: ReportViewModel = viewModel(factory = ReportViewModelFactory)
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val context = LocalContext.current
     val expenses by viewModel.filteredExpenses.collectAsState()
     val availableCategories by viewModel.categories.collectAsState()
     val availablePaymentMethods by viewModel.paymentMethods.collectAsState()
@@ -133,6 +136,14 @@ fun ReportScreen(
                     titleContentColor = MaterialTheme.colorScheme.onPrimary
                 ),
                 title = { Text("Relatórios") },
+                actions = {
+                    IconButton(onClick = {viewModel.onExportClicked(context)}) {
+                        Icon(
+                            imageVector = Icons.Default.Share,
+                            contentDescription = "Exportar Dados"
+                        )
+                    }
+                },
                 navigationIcon = {
                     IconButton(onClick = { navController.navigateUp() }) {
                         Icon(
