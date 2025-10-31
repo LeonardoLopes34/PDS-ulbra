@@ -147,11 +147,11 @@ fun ConfigurationScreen(
                         Icon(
                             imageVector = Icons.Default.Add,
                             contentDescription = "Icone para adicionar Categoria",
-                            tint = MaterialTheme.colorScheme.onSurface
+                            tint = Color.Black
                         )
                         Text(
                             "Adicionar Categoria",
-                            color = MaterialTheme.colorScheme.onSurface
+                            color = Color.Black
                         )
                     }
                 }

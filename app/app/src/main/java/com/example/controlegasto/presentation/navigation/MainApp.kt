@@ -3,6 +3,7 @@ package com.example.controlegasto.presentation.navigation
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.BottomAppBar
@@ -20,6 +21,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.example.controlegasto.presentation.aiAnalysis.AiAnalysisScreen
 import com.example.controlegasto.presentation.configuration.ConfigurationScreen
 import com.example.controlegasto.presentation.home.HomeScreen
 import com.example.controlegasto.presentation.reports.ReportScreen
@@ -36,11 +38,13 @@ fun MainApp() {
                 val navItems = listOf(
                     "Inicio" to Icons.Default.Home,
                     "Relatórios" to Icons.Default.Search,
+                    "Busca IA" to Icons.Default.Info,
                     "Configurações" to Icons.Default.Settings
                 )
                 val screens = listOf(
                     Screen.Home,
                     Screen.Report,
+                    Screen.AiAnalysis,
                     Screen.Configuration
                 )
                 navItems.forEachIndexed { index, item ->
@@ -71,6 +75,6 @@ fun MainApp() {
             composable(Screen.Home.route) { HomeScreen() }
             composable(Screen.Report.route) { ReportScreen(navController = navController) }
             composable(Screen.Configuration.route) { ConfigurationScreen(navController = navController) }
-        }
+            composable(Screen.AiAnalysis.route) { AiAnalysisScreen(navController = navController) }        }
     }
 }

@@ -16,15 +16,15 @@ val BackgroundLight = Color(0xFFD5EAF6)
 val ButtonColor = Color(0xFF0F766E)
 
 val DarkPrimary = Color(0xFF5EEAD4)
-val DarkBackground = Color(0xA8000000)
+val DarkBackground = Color(0xFF1F1E1E)
 
 private val DarkColorScheme = darkColorScheme(
     primary = DarkPrimary,
     background = DarkBackground,
     surface = DarkBackground,
     onPrimary = Color.Black,
-    onBackground = Color(0xFFE2E8F0),
-    onSurface = Color.Black
+    onBackground = Color(0xFFEEE3E3),
+    onSurface = Color(0xFFFCFCFC)
 )
 
 // Paleta de Cores para o MODO CLARO

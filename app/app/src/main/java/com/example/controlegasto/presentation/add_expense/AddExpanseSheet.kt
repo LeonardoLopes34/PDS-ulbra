@@ -107,7 +107,10 @@ fun AddExpenseSheet(
 
     // bottomsheet for category
     if (uiState.isCategorySheetVisible){
-        ModalBottomSheet(onDismissRequest = viewModel::onCategoryPickerDismiss) {
+        ModalBottomSheet(
+            onDismissRequest = viewModel::onCategoryPickerDismiss,
+            containerColor = MaterialTheme.colorScheme.surface
+        ) {
             LazyColumn {
                 items(uiState.categoryList) {category ->
                     ListItem(
@@ -125,7 +128,10 @@ fun AddExpenseSheet(
     }
     // bottomsheet for payment method
     if (uiState.isPaymentMethodSheetVisible) {
-        ModalBottomSheet(onDismissRequest = viewModel::onPaymentMethodPickerDismiss) {
+        ModalBottomSheet(
+            onDismissRequest = viewModel::onPaymentMethodPickerDismiss,
+            containerColor = MaterialTheme.colorScheme.surface
+            ) {
             LazyColumn {
                 items(uiState.paymentMethodList) {paymentMethodItem ->
                     ListItem(
@@ -170,7 +176,8 @@ fun AddExpenseSheet(
                     icon = {
                         Icon(
                             painter = painterResource(id = R.drawable.outline_wallet_24),
-                            contentDescription = "Icone de carteira"
+                            contentDescription = "Icone de carteira",
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     },
                     onClick = viewModel::onPaymentMethodPicker
@@ -181,7 +188,8 @@ fun AddExpenseSheet(
                     icon = {
                         Icon(
                             painter = painterResource(id = R.drawable.outline_shopping_cart_24),
-                            contentDescription = "Icone da categoria"
+                            contentDescription = "Icone da categoria",
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     },
                     onClick = viewModel::onCategoryPicker
@@ -196,7 +204,8 @@ fun AddExpenseSheet(
                     icon = {
                         Icon(
                             painter = painterResource(id = R.drawable.outline_calendar_today_24),
-                            contentDescription = "Icone de calendario"
+                            contentDescription = "Icone de calendario",
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     },
                     onClick = viewModel::onOpenDatePicker
@@ -254,6 +263,7 @@ fun PickerField(
         Text(
             text = label,
             style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(bottom = 4.dp)
         )
         Row(
@@ -270,12 +280,16 @@ fun PickerField(
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 icon()
-                Text(text = value)
+                Text(
+                    text = value,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
             }
             Icon(
                 imageVector = Icons.Default.ArrowBack,
                 contentDescription = "Selecionar",
-                modifier = Modifier.size(16.dp)
+                modifier = Modifier.size(16.dp),
+                tint = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
     }

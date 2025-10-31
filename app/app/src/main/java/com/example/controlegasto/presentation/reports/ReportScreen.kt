@@ -154,19 +154,7 @@ fun ReportScreen(
                 }
             )
         },
-        floatingActionButton = {
-            FloatingActionButton(
-                containerColor = MaterialTheme.colorScheme.primary,
-                contentColor = MaterialTheme.colorScheme.onPrimary,
-                onClick = viewModel::onOpenAIPrompt,
-                modifier = Modifier.size(80.dp),
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Add,
-                    contentDescription = "Adicionar Gasto"
-                )
-            }
-        },
+
         content = { innerPadding ->
             Column(
                 modifier = Modifier
