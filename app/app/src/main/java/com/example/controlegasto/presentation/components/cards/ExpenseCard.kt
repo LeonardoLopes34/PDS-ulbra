@@ -43,7 +43,6 @@ fun ExpenseCard(
     item: ExpenseWithCategory,
     onEditClick: () -> Unit,
     onDeleteClick: () -> Unit,
-    isSelected: Boolean = false,
 
 ) {
 

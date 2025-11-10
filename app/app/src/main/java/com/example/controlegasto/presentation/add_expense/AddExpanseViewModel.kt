@@ -5,15 +5,18 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.example.controlegasto.ExpenseControlApplication
+import com.example.controlegasto.data.repository.AIAnalyticsRepository
 import com.example.controlegasto.data.repository.CategoryRepository
 import com.example.controlegasto.domain.entities.Category
 import com.example.controlegasto.domain.entities.Expense
 import com.example.controlegasto.domain.entities.PaymentMethod
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.isActive
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.io.File
 import java.time.LocalDate
 
 data class AddExpanseUiState(
@@ -27,10 +30,14 @@ data class AddExpanseUiState(
     val isPaymentMethodSheetVisible: Boolean = false,
     val errorMessage: String? = "",
     val categoryList: List<Category> = emptyList(),
-    val paymentMethodList: List<PaymentMethod> = emptyList()
+    val paymentMethodList: List<PaymentMethod> = emptyList(),
+    val isProcessingReceipt: Boolean = false
 )
 
-class AddExpanseViewModel(private val categoryRepository: CategoryRepository): ViewModel() {
+class AddExpanseViewModel(
+    private val categoryRepository: CategoryRepository,
+    private val aiAnalyticsRepository: AIAnalyticsRepository
+): ViewModel() {
     private val _uiState = MutableStateFlow(AddExpanseUiState())
     val uiState = _uiState.asStateFlow()
 
@@ -124,7 +131,6 @@ class AddExpanseViewModel(private val categoryRepository: CategoryRepository): V
             )
         }
     }
-
     fun resetState() {
         _uiState.update {
             AddExpanseUiState(
@@ -133,7 +139,39 @@ class AddExpanseViewModel(private val categoryRepository: CategoryRepository): V
             )
         }
     }
-    // get category and payment methods from repository
+    fun onReceiptImageTaken(imageFile: File) {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isProcessingReceipt = true) }
+            try {
+                val response = aiAnalyticsRepository.processReceiptImage(imageFile)
+                val allCategories = categoryRepository.getAllCategories().first()
+                val suggestedCategory = allCategories.find {
+                    it.name.equals(response.suggestedCategory, ignoreCase = true)
+                } ?: Category.default()
+
+                val suggestedPaymentMethod = PaymentMethod.entries.find {
+                    it.name.equals(response.paymentMethod, ignoreCase = true)
+                } ?: PaymentMethod.entries.find {
+                    it.displayName.equals(response.paymentMethod, ignoreCase = true)
+                }
+
+                _uiState.update {
+                    it.copy(
+                        isProcessingReceipt = false,
+                        expanseValue = response.totalValue.toString(),
+                        expanseDescription = response.description,
+                        expanseSelectedCategory = suggestedCategory,
+                        expanseSelectedPaymentMethod = suggestedPaymentMethod,
+                        expanseSelectedDate = if(response.date != null) LocalDate.parse(response.date) else LocalDate.now()
+                    )
+                }
+            } catch (e: Exception) {
+                _uiState.update { it.copy(isProcessingReceipt = false, errorMessage = "Erro ao ler recibo: ${e.message}") }
+            } finally {
+                imageFile.delete()
+            }
+        }
+    }
 }
 
 
@@ -142,10 +180,11 @@ object AddExpenseViewModelFactory : ViewModelProvider.Factory {
         val application = checkNotNull(extras[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY])
 
         val categoryRepository = (application as ExpenseControlApplication).categoryRepository
+        val aiAnalyticsRepository = application.aiAnalyticsRepository
 
         if (modelClass.isAssignableFrom(AddExpanseViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")
-            return AddExpanseViewModel(categoryRepository) as T
+            return AddExpanseViewModel(categoryRepository, aiAnalyticsRepository) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }

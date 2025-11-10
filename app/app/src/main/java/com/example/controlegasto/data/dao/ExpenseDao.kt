@@ -14,7 +14,7 @@ import java.time.LocalDate
 interface ExpenseDao {
 
     @Insert
-    suspend fun createExpense(expense: Expense)
+    suspend fun createExpense(expense: Expense): Long
 
     @Update
     suspend fun updateExpense(expense: Expense)
