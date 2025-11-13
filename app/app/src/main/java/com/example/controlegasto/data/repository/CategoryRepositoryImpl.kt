@@ -24,5 +24,9 @@ class CategoryRepositoryImpl(private val categoryDao: CategoryDao) : CategoryRep
         categoryDao.deleteCategory(category)
     }
 
+    override suspend fun getCategoryByName(name: String): Category? {
+        return categoryDao.getCategoryByName(name)
+    }
+
 
 }

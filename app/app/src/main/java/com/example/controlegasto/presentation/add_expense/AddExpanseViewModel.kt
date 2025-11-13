@@ -10,12 +10,14 @@ import com.example.controlegasto.data.repository.CategoryRepository
 import com.example.controlegasto.domain.entities.Category
 import com.example.controlegasto.domain.entities.Expense
 import com.example.controlegasto.domain.entities.PaymentMethod
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.isActive
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.File
 import java.time.LocalDate
 
@@ -144,16 +146,15 @@ class AddExpanseViewModel(
             _uiState.update { it.copy(isProcessingReceipt = true) }
             try {
                 val response = aiAnalyticsRepository.processReceiptImage(imageFile)
-                val allCategories = categoryRepository.getAllCategories().first()
-                val suggestedCategory = allCategories.find {
-                    it.name.equals(response.suggestedCategory, ignoreCase = true)
+                val suggestedCategory = withContext(Dispatchers.IO) {
+                    categoryRepository.getCategoryByName(response.suggestedCategory)
                 } ?: Category.default()
 
                 val suggestedPaymentMethod = PaymentMethod.entries.find {
                     it.name.equals(response.paymentMethod, ignoreCase = true)
                 } ?: PaymentMethod.entries.find {
                     it.displayName.equals(response.paymentMethod, ignoreCase = true)
-                }
+                } ?: PaymentMethod.entries.first()
 
                 _uiState.update {
                     it.copy(
@@ -162,7 +163,7 @@ class AddExpanseViewModel(
                         expanseDescription = response.description,
                         expanseSelectedCategory = suggestedCategory,
                         expanseSelectedPaymentMethod = suggestedPaymentMethod,
-                        expanseSelectedDate = if(response.date != null) LocalDate.parse(response.date) else LocalDate.now()
+                        expanseSelectedDate = if (response.date != null) parseDateSafe(response.date) else LocalDate.now()
                     )
                 }
             } catch (e: Exception) {
@@ -170,6 +171,14 @@ class AddExpanseViewModel(
             } finally {
                 imageFile.delete()
             }
+        }
+    }
+    private fun parseDateSafe(dateString: String?): LocalDate {
+        if (dateString.isNullOrBlank()) return LocalDate.now()
+        return try {
+            LocalDate.parse(dateString)
+        } catch (e: Exception) {
+            LocalDate.now()
         }
     }
 }

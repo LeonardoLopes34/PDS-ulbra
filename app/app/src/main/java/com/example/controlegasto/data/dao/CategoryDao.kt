@@ -25,4 +25,7 @@ interface CategoryDao {
     @Query("SELECT * FROM categories ORDER BY name ASC")
     fun getAllCategories(): Flow<List<Category>>
 
+    @Query("SELECT * FROM categories WHERE TRIM(name) = :name COLLATE NOCASE LIMIT 1")
+    fun getCategoryByName(name: String): Category?
+
 }

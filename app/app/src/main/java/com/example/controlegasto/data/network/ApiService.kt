@@ -39,10 +39,15 @@ data class BulkSyncRequest(
 )
 
 data class ReceiptAnalysisResponse(
+    @SerializedName("total_value")
     val totalValue: Float,
+    @SerializedName("description")
     val description: String,
+    @SerializedName("suggested_category")
     val suggestedCategory: String,
+    @SerializedName("payment_method")
     val paymentMethod: String?,
+    @SerializedName("date")
     val date: String?
 )
 
@@ -59,5 +64,5 @@ interface ApiService {
 
     @Multipart
     @POST("process-receipt")
-    suspend fun processReceipt(@Part image: MultipartBody.Part): ReceiptAnalysisResponse
+    suspend fun processReceipt(@Part file: MultipartBody.Part): ReceiptAnalysisResponse
 }
