@@ -9,4 +9,5 @@ interface AIAnalyticsRepository {
     suspend fun getFilteredExpenseIds(prompt: String): AIFilterResponse
     suspend fun syncAllExpenses(expenses: List<SyncExpensePayload>)
     suspend fun processReceiptImage(imageFile: File): ReceiptAnalysisResponse
+    suspend fun getFinancialInsights(): String
 }

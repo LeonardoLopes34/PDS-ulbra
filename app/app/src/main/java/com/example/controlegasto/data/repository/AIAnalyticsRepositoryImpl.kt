@@ -30,4 +30,9 @@ class AIAnalyticsRepositoryImpl(private val apiService: ApiService): AIAnalytics
         return apiService.processReceipt(body)
     }
 
+    override suspend fun getFinancialInsights(): String {
+        val response = apiService.generateInsights()
+        return response.insightText
+    }
+
 }

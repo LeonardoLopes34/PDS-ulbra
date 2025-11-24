@@ -22,7 +22,9 @@ data class AiAnalysisUiState(
     val prompt: String = "",
     val isLoading: Boolean = false,
     val aiResponseText: String? = null,
-    val filteredExpenses: List<ExpenseWithCategory> = emptyList()
+    val filteredExpenses: List<ExpenseWithCategory> = emptyList(),
+    val financialInsight: String? = null,
+    val isGeneratingInsight: Boolean = false
 )
 
 class AiAnalysisViewModel(
@@ -83,6 +85,29 @@ class AiAnalysisViewModel(
             }
         }
     }
+
+    fun generateInsight() {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isGeneratingInsight = true) }
+            try {
+                val insight = aiAnalyticsRepository.getFinancialInsights()
+                _uiState.update {
+                    it.copy(
+                        isGeneratingInsight = false,
+                        financialInsight = insight
+                    )
+                }
+            } catch (e: Error) {
+                _uiState.update {
+                    it.copy(
+                        isGeneratingInsight = false,
+                        financialInsight = "Não foi possivel gerar insights"
+                    )
+                }
+            }
+        }
+    }
+
 }
 
 

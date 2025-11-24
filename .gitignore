@@ -1,0 +1,61 @@
+########################################
+#            ANDROID
+########################################
+
+*.iml
+.gradle
+/local.properties
+/.idea/
+.DS_Store
+/build
+/captures
+.externalNativeBuild
+.cxx
+local.properties
+
+########################################
+#            PYTHON
+########################################
+
+venv/
+.env/
+env/
+.venv/
+ENV/
+
+# Segredos (OpenAI etc.)
+*.env
+.env.*
+secrets.json
+
+# Cache do Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Artefatos
+build/
+dist/
+*.egg-info/
+*.egg
+
+# Logs e temporários
+*.log
+*.tmp
+*.temp
+
+########################################
+#            IDEs
+########################################
+
+.vscode/
+.swp
+.swo
+
+########################################
+#            SISTEMA
+########################################
+
+.DS_Store
+*.cache
+Thumbs.db

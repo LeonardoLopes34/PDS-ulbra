@@ -51,6 +51,11 @@ data class ReceiptAnalysisResponse(
     val date: String?
 )
 
+data class InsightsResponse(
+    @SerializedName("insight_text")
+    val insightText: String
+)
+
 interface ApiService {
     @POST("filter-expenses")
     suspend fun getFilteredExpenseIds(@Body request: AIFilterRequest): AIFilterResponse
@@ -65,4 +70,7 @@ interface ApiService {
     @Multipart
     @POST("process-receipt")
     suspend fun processReceipt(@Part file: MultipartBody.Part): ReceiptAnalysisResponse
+
+    @POST("generate-insights")
+    suspend fun generateInsights(): InsightsResponse
 }
